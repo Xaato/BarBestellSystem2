@@ -1,3 +1,4 @@
+using Application;
 using BarBestellSystem2.Data;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
@@ -13,6 +14,7 @@ namespace BarBestellSystem2
             // Add services to the container.
             builder.Services.AddRazorPages();
             builder.Services.AddServerSideBlazor();
+            builder.Services.AddApplication();
             builder.Services.AddSingleton<WeatherForecastService>();
 
             var app = builder.Build();
