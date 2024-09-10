@@ -1,0 +1,48 @@
+﻿@page "/TableMap"
+
+<pageTitle>Restaurantkarte</pageTitle>
+
+<h1>Restaurantkarte</h1>
+
+<div class="restaurant-map position-relative border bg-light" style="width: 800px; height: 600px;">
+    @foreach (var table in tables)
+    {
+        <button class="btn btn-success btn-lg rounded-circle position-absolute"
+                style="left:@($"{table.XPos}px"); top:@($"{table.YPos}px");">
+            @table.TischName
+        </button>
+    }
+</div>
+
+
+@code {
+    private List<TableModel> tables = new List<TableModel>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        //Datenbank abfragen und die Positionen laden
+        tables = await LoadTablePositionsFromDatabase();
+    }
+
+    // Beispielmethode päter durch eine echte Datenbankabfrage ersetzen
+    private Task<List<TableModel>> LoadTablePositionsFromDatabase()
+    {
+        // Simulierte Daten
+        return Task.FromResult(new List<TableModel>
+        {
+            new TableModel { TischID = 1, TischName = "Tisch 1", XPos = 100, YPos = 100 },
+            new TableModel { TischID = 2, TischName = "Tisch 2", XPos = 200, YPos = 150 },
+            new TableModel { TischID = 3, TischName = "Tisch 3", XPos = 300, YPos = 200 },
+            new TableModel { TischID = 4, TischName = "Tisch 4", XPos = 400, YPos = 250 }
+        });
+    }
+
+    // Modell für die Tische
+    public class TableModel
+    {
+        public int TischID { get; set; }
+        public string TischName { get; set; }
+        public int XPos { get; set; }
+        public int YPos { get; set; }
+    }
+}
