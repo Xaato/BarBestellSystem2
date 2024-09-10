@@ -1,4 +1,6 @@
 ﻿@page "/TableMap"
+@inject Application.BarDbContext DbContext
+@using Microsoft.EntityFrameworkCore
 
 <pageTitle>Restaurantkarte</pageTitle>
 
@@ -8,41 +10,33 @@
     @foreach (var table in tables)
     {
         <button class="btn btn-success btn-lg rounded-circle position-absolute"
-                style="left:@($"{table.XPos}px"); top:@($"{table.YPos}px");">
-            @table.TischName
+                style="left:@($"{table.X}px"); top:@($"{table.Y}px");">
+            @table.Name
         </button>
     }
 </div>
-
-
 @code {
-    private List<TableModel> tables = new List<TableModel>();
+    private List<Application.Table> tables = new List<Application.Table>();
+
+    protected override void OnInitialized()
+    {
+        // Simulierte Daten einfügen
+        tables = new List<Application.Table>
+        {
+            new Application.Table { Id = Guid.NewGuid(), Name = "Tisch 1", X = 100, Y = 150 },
+            new Application.Table { Id = Guid.NewGuid(), Name = "Tisch 2", X = 200, Y = 300 },
+            new Application.Table { Id = Guid.NewGuid(), Name = "Tisch 3", X = 300, Y = 450 },
+            new Application.Table { Id = Guid.NewGuid(), Name = "Tisch 4", X = 400, Y = 200 }
+        };
+    }
+}
+@*Der folgende Code ist der richtige *@
+@* @code {
+    private List<Application.Table> tables = new List<Application.Table>();
 
     protected override async Task OnInitializedAsync()
     {
-        //Datenbank abfragen und die Positionen laden
-        tables = await LoadTablePositionsFromDatabase();
+        // Direkt aus DbContext Daten abrufen
+        tables = await DbContext.Tables.ToListAsync();
     }
-
-    // Beispielmethode päter durch eine echte Datenbankabfrage ersetzen
-    private Task<List<TableModel>> LoadTablePositionsFromDatabase()
-    {
-        // Simulierte Daten
-        return Task.FromResult(new List<TableModel>
-        {
-            new TableModel { TischID = 1, TischName = "Tisch 1", XPos = 100, YPos = 100 },
-            new TableModel { TischID = 2, TischName = "Tisch 2", XPos = 200, YPos = 150 },
-            new TableModel { TischID = 3, TischName = "Tisch 3", XPos = 300, YPos = 200 },
-            new TableModel { TischID = 4, TischName = "Tisch 4", XPos = 400, YPos = 250 }
-        });
-    }
-
-    // Modell für die Tische
-    public class TableModel
-    {
-        public int TischID { get; set; }
-        public string TischName { get; set; }
-        public int XPos { get; set; }
-        public int YPos { get; set; }
-    }
-}
+} *@

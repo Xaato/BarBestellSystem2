@@ -4,27 +4,27 @@
 <PageTitle>Counter</PageTitle>
 
 <h1>Counter</h1>
-
+@* 
 <p role="status">Current count: @currentCount</p>
 
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+<button class="btn btn-primary" @onclick="IncrementCount">Click me</button> *@
 
 @code {
-    private int currentCount = 0;
+    // private int currentCount = 0;
     
-    [Inject]
-    private BarDbContext barDbContext;
+    // [Inject]
+    // private BarDbContext barDbContext;
     
-    private List<Table> tables = new();
+    // private List<Table> tables = new();
     
 
-    private void IncrementCount()
-    {
-        currentCount++;
-    }
+    // private void IncrementCount()
+    // {
+    //     currentCount++;
+    // }
     
-    protected override async Task OnInitializedAsync()
-    {
-        tables = await barDbContext.Tables.ToListAsync();
-    }
+    // protected override async Task OnInitializedAsync()
+    // {
+    //     tables = await barDbContext.Tables.ToListAsync();
+    // }
 }
