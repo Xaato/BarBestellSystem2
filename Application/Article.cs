@@ -11,6 +11,6 @@ namespace Application
         public string Name { get; set; }
         public decimal Price { get; set; }
         public int ArticleGroupId { get; set; }
-        public ArticleGroup ArticleGroup { get; set; }
+        public ArticleGroup? ArticleGroup { get; set; }
     }
 }

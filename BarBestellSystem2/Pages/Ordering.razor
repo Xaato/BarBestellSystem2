@@ -1,0 +1,73 @@
+﻿@using Application
+@page "/order"
+
+<PageTitle>Order</PageTitle>
+
+<h1>Order</h1>
+
+<div class="accordion">
+  @foreach (ArticleGroup Category in GetCategories())
+  {
+    <div class="accordion-item">
+      <h2>
+        <button class="accordion-button @ActiveStates[Category][0]" type="button" data-bs-toggle="collapse"
+          data-bs-target="#collapseOne" aria-expanded="@((ActiveStates[Category][1] == "show").ToString())"
+          aria-controls="collapseOne" @onclick="@(e => SwitchState(Category))">
+          @Category.Name
+        </button>
+      </h2>
+      <div id="collapse@Category" class="accordion-collapse collapse @ActiveStates[Category][1]"
+        aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+        <div class="accordion-body">
+          <div class="list-group">
+            @foreach (Article Item in Category.Articles.ToArray())
+            {
+              <button type="button" class="list-group-item list-group-item-action" @onclick="@(e => AddToCart(Item))">
+                @Item.Name
+              </button>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>
+
+@code {
+  string ActiveCategory = string.Empty;
+  Dictionary<ArticleGroup, string[]> ActiveStates = new();
+  Dictionary<Article, int> Cart = new();
+
+  private ArticleGroup[] GetCategories()
+  {
+    if (ActiveStates.Keys.Count() == 0)
+    {
+      ActiveStates.Add(new ArticleGroup() { Name = "Test 1", Articles = new List<Article>() }, ["", "collapsed"]);
+      ActiveStates.Add(new ArticleGroup() { Name = "Test 2", Articles = new List<Article>() }, ["", "collapsed"]);
+      ActiveStates.Add(new ArticleGroup() { Name = "Test 3", Articles = new List<Article>() }, ["", "collapsed"]);
+      foreach (ArticleGroup lCat in ActiveStates.Keys)
+      {
+        (lCat.Articles as List<Article>)?.Add(new Article() { Name = "Test1" });
+        (lCat.Articles as List<Article>)?.Add(new Article() { Name = "Test2" });
+        (lCat.Articles as List<Article>)?.Add(new Article() { Name = "Test3" });
+      }
+    }
+    return ActiveStates.Keys.ToArray();
+  }
+  private void SwitchState(ArticleGroup Category)
+  {
+    foreach (ArticleGroup lCategory in ActiveStates.Keys)
+    {
+      bool lState = false;
+      if (Category == lCategory)
+        lState = !string.Equals(ActiveStates[lCategory][1], "show");
+      ActiveStates[lCategory][0] = lState ? null : "collapsed";
+      ActiveStates[lCategory][1] = lState ? "show" : null;
+    }
+    StateHasChanged();
+  }
+  private void AddToCart(Article Article)
+  {
+
+  }
+}
