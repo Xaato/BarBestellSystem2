@@ -8,4 +8,6 @@ public class BarDbContext: DbContext
     {
     }
     public DbSet<Table> Tables { get; set; }
+    public DbSet<Article> Articles { get; set; }
+    public DbSet<ArticleGroup> ArticleGroups { get; set; }
 }

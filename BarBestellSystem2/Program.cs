@@ -1,7 +1,7 @@
 using Application;
-using BarBestellSystem2.Data;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace BarBestellSystem2
 {
@@ -15,7 +15,6 @@ namespace BarBestellSystem2
             builder.Services.AddRazorPages();
             builder.Services.AddServerSideBlazor();
             builder.Services.AddApplication();
-            builder.Services.AddSingleton<WeatherForecastService>();
 
             var app = builder.Build();
 

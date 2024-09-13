@@ -15,28 +15,28 @@
         </button>
     }
 </div>
-@code {
-    private List<Application.Table> tables = new List<Application.Table>();
-
-    protected override void OnInitialized()
-    {
-        // Simulierte Daten einfügen
-        tables = new List<Application.Table>
-        {
-            new Application.Table { Id = Guid.NewGuid(), Name = "Tisch 1", X = 100, Y = 150 },
-            new Application.Table { Id = Guid.NewGuid(), Name = "Tisch 2", X = 200, Y = 300 },
-            new Application.Table { Id = Guid.NewGuid(), Name = "Tisch 3", X = 300, Y = 450 },
-            new Application.Table { Id = Guid.NewGuid(), Name = "Tisch 4", X = 400, Y = 200 }
-        };
-    }
-}
+@* @code { *@
+@*     private List<Application.Table> tables = new List<Application.Table>(); *@
+@* *@
+@*     protected override void OnInitialized() *@
+@*     { *@
+@*         // Simulierte Daten einfügen *@
+@*         tables = new List<Application.Table> *@
+@*         { *@
+@*             new Application.Table { Id = Guid.NewGuid(), Name = "Tisch 1", X = 100, Y = 150 }, *@
+@*             new Application.Table { Id = Guid.NewGuid(), Name = "Tisch 2", X = 200, Y = 300 }, *@
+@*             new Application.Table { Id = Guid.NewGuid(), Name = "Tisch 3", X = 300, Y = 450 }, *@
+@*             new Application.Table { Id = Guid.NewGuid(), Name = "Tisch 4", X = 400, Y = 200 } *@
+@*         }; *@
+@*     } *@
+@* } *@
 @*Der folgende Code ist der richtige *@
-@* @code {
-    private List<Application.Table> tables = new List<Application.Table>();
+@code {
+    private List<Application.Table> tables = [];
 
     protected override async Task OnInitializedAsync()
     {
         // Direkt aus DbContext Daten abrufen
         tables = await DbContext.Tables.ToListAsync();
     }
-} *@
+}

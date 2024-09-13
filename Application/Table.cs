@@ -1,4 +1,6 @@
-﻿namespace Application;
+﻿using System;
+
+namespace Application;
 
 public sealed class Table
 {
