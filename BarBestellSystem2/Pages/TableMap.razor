@@ -9,28 +9,43 @@
 <div class="restaurant-map position-relative border bg-light" style="width: 800px; height: 600px;">
     @foreach (var table in tables)
     {
-        <button class="btn btn-success btn-lg rounded-circle position-absolute"
-                style="left:@($"{table.X}px"); top:@($"{table.Y}px");">
-            @table.Name
-        </button>
+        // Überprüfen, ob der Tisch innerhalb der Karte ist
+        if (table.X >= 0 && table.X <= 800 - 50 && table.Y >= 0 && table.Y <= 600 - 50)
+        {
+            // Tisch innerhalb der Karte
+            <NavLink href=@{$"Ordering/{table.Id}"}>
+            <button class="btn btn-success btn-lg rounded-circle position-absolute"
+                    style="left:@($"{table.X}px"); top:@($"{table.Y}px");">
+                @table.Name
+            </button>
+            </NavLink>
+        }
     }
+
+    <!-- Bereich für Tische außerhalb der Karte (rechts neben der Karte) -->
+    <div class="out-of-bounds-tables position-absolute" style="left: 810px; top: 0;">
+        @* Initialisiere die Startposition für Tische außerhalb *@
+        @{
+        var outOfBoundsY = 0;
+        }
+        @foreach (var table in tables)
+        {
+           
+            // Wenn der Tisch außerhalb der Karte liegt
+            if (table.X < 0 || table.X > 800 - 50 || table.Y < 0 || table.Y > 600 - 50)
+            {
+                <button class="btn btn-danger btn-lg rounded-circle position-relative"
+                        style="left: 0px; top:@($"{outOfBoundsY}px");">
+                    @table.Name
+                </button>
+
+                // Abstand für den nächsten Button setzen (50px Button + 10px Abstand)
+                outOfBoundsY += 60;
+            }
+        }
+    </div>
 </div>
-@* @code { *@
-@*     private List<Application.Table> tables = new List<Application.Table>(); *@
-@* *@
-@*     protected override void OnInitialized() *@
-@*     { *@
-@*         // Simulierte Daten einfügen *@
-@*         tables = new List<Application.Table> *@
-@*         { *@
-@*             new Application.Table { Id = Guid.NewGuid(), Name = "Tisch 1", X = 100, Y = 150 }, *@
-@*             new Application.Table { Id = Guid.NewGuid(), Name = "Tisch 2", X = 200, Y = 300 }, *@
-@*             new Application.Table { Id = Guid.NewGuid(), Name = "Tisch 3", X = 300, Y = 450 }, *@
-@*             new Application.Table { Id = Guid.NewGuid(), Name = "Tisch 4", X = 400, Y = 200 } *@
-@*         }; *@
-@*     } *@
-@* } *@
-@*Der folgende Code ist der richtige *@
+
 @code {
     private List<Application.Table> tables = [];
 
