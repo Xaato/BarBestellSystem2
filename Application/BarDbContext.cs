@@ -10,6 +10,8 @@ public class BarDbContext : DbContext
     public DbSet<Table> Tables { get; set; }
     public DbSet<Article> Articles { get; set; }
     public DbSet<ArticleGroup> ArticleGroups { get; set; }
+    public DbSet<Order> Orders { get; set; }
+    public DbSet<OrderArticle> OrderArticles { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
