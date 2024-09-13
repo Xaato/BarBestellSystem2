@@ -1,5 +1,6 @@
 ﻿@page "/TableMap"
 @inject Application.BarDbContext DbContext
+@using Application.Models
 @using Microsoft.EntityFrameworkCore
 
 <pageTitle>Restaurantkarte</pageTitle>
@@ -32,7 +33,7 @@
 @* } *@
 @*Der folgende Code ist der richtige *@
 @code {
-    private List<Application.Table> tables = [];
+    private List<Table> tables = [];
 
     protected override async Task OnInitializedAsync()
     {
