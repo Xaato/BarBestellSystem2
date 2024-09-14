@@ -1,9 +1,39 @@
 ﻿@using Application.Models
-@page "/order"
+@using Microsoft.EntityFrameworkCore
+@inject Application.BarDbContext Context
+@page "/ordering/{Table}"
 
 <PageTitle>Order</PageTitle>
 
 <h1>Order</h1>
+
+<div class="accordion" id="accordionExample">
+  <div class="accordion-item">
+    <h2 class="accordion-header" id="headingOne">
+      <button class="accordion-button @(CartOpen ? null : "collapsed")" type="button" data-bs-toggle="collapse"
+        data-bs-target="#collapseOne" aria-expanded="@CartOpen.ToString()" aria-controls="collapseOne"
+        @onclick="@(e => {CartOpen = !CartOpen;})">
+        Cart
+      </button>
+    </h2>
+    <div id="collapseOne" class="accordion-collapse collapse @(CartOpen ? "show" : null)" aria-labelledby="headingOne"
+      data-bs-parent="#accordionExample">
+      <div class="accordion-body">
+        <div class="list-group">
+          @foreach (var Item in Cart)
+          {
+            <button type="button" class="list-group-item list-group-item-action"
+              @onclick="@(e => RemoveFromCart(Item.Key))">
+              @Item.Key.ArticleGroup?.Name / @Item.Key.Name x @Item.Value
+            </button>
+          }
+        </div>
+        <button type="button" class="btn btn-success mt-2" @onclick="Order">Order</button>
+      </div>
+    </div>
+  </div>
+</div>
+<br />
 
 <div class="accordion">
   @foreach (ArticleGroup Category in GetCategories())
@@ -33,26 +63,35 @@
   }
 </div>
 
+
 @code {
   string ActiveCategory = string.Empty;
   Dictionary<ArticleGroup, string[]> ActiveStates = new();
+  bool CartOpen = false;
   Dictionary<Article, int> Cart = new();
+  [Parameter]
+  public string? Table { get; set; }
 
   private ArticleGroup[] GetCategories()
   {
     if (ActiveStates.Keys.Count() == 0)
     {
-      ActiveStates.Add(new ArticleGroup() { Name = "Test 1", Articles = new List<Article>() }, ["", "collapsed"]);
-      ActiveStates.Add(new ArticleGroup() { Name = "Test 2", Articles = new List<Article>() }, ["", "collapsed"]);
-      ActiveStates.Add(new ArticleGroup() { Name = "Test 3", Articles = new List<Article>() }, ["", "collapsed"]);
-      foreach (ArticleGroup lCat in ActiveStates.Keys)
+      foreach (ArticleGroup lCat in Context.ArticleGroups.Include(item => item.Articles).ToArray())
       {
-        (lCat.Articles as List<Article>)?.Add(new Article() { Name = "Test1" });
-        (lCat.Articles as List<Article>)?.Add(new Article() { Name = "Test2" });
-        (lCat.Articles as List<Article>)?.Add(new Article() { Name = "Test3" });
+        ActiveStates.Add(lCat, ["", "collapsed"]);
       }
+      @*
+ActiveStates.Add(new ArticleGroup() { Name = "Nicht-alkoholisch", Articles = new List<Article>() }, ["", "collapsed"]);
+ActiveStates.Add(new ArticleGroup() { Name = "Bier", Articles = new List<Article>() }, ["", "collapsed"]);
+ActiveStates.Add(new ArticleGroup() { Name = "Wein", Articles = new List<Article>() }, ["", "collapsed"]);
+foreach (ArticleGroup lCat in ActiveStates.Keys)
+{
+(lCat.Articles as List<Article>)?.Add(new Article() { Name = "Test1", ArticleGroup = lCat});
+(lCat.Articles as List<Article>)?.Add(new Article() { Name = "Test2", ArticleGroup = lCat });
+(lCat.Articles as List<Article>)?.Add(new Article() { Name = "Test3", ArticleGroup = lCat });
+} *@
     }
-    return ActiveStates.Keys.ToArray();
+    return ActiveStates.Keys.ToArray() ?? [];
   }
   private void SwitchState(ArticleGroup Category)
   {
@@ -68,6 +107,37 @@
   }
   private void AddToCart(Article Article)
   {
+    if (Cart.Keys.Contains(Article))
+      Cart[Article]++;
+    else
+      Cart.Add(Article, 1);
+  }
+  private void RemoveFromCart(Article Article)
+  {
+    if (Cart.Keys.Contains(Article))
+      if (Cart[Article] > 1)
+        Cart[Article]--;
+      else
+        Cart.Remove(Article);
+  }
+  private void Order()
+  {
+    if (!int.TryParse(Table, out _))
+      return;
 
+    Order lOrder = Context.Orders.Add(new()
+      {
+        TableId = int.Parse(Table),
+        Timestamp = DateTime.Now
+      }).Entity;
+    foreach (var lOrderPosition in Cart)
+    {
+      Context.OrderArticles.Add(new()
+        {
+          Article = lOrderPosition.Key,
+          Amount = lOrderPosition.Value
+        });
+    }
+    Cart.Clear();
   }
 }
