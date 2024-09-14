@@ -1,7 +1,7 @@
 ﻿@page "/TableMap"
 @inject Application.BarDbContext DbContext
-@using Application.Models
 @using Microsoft.EntityFrameworkCore
+@using Table = Application.Table
 
 <pageTitle>Restaurantkarte</pageTitle>
 
@@ -15,10 +15,10 @@
         {
             // Tisch innerhalb der Karte
             <NavLink href=@{$"Ordering/{table.Id}"}>
-            <button class="btn btn-success btn-lg rounded-circle position-absolute"
-                    style="left:@($"{table.X}px"); top:@($"{table.Y}px");">
-                @table.Name
-            </button>
+                <button class="btn btn-success btn-lg rounded-circle position-absolute"
+                        style="left:@($"{table.X}px"); top:@($"{table.Y}px");">
+                    @table.Name
+                </button>
             </NavLink>
         }
     }
@@ -27,11 +27,10 @@
     <div class="out-of-bounds-tables position-absolute" style="left: 810px; top: 0;">
         @* Initialisiere die Startposition für Tische außerhalb *@
         @{
-        var outOfBoundsY = 0;
+            var outOfBoundsY = 0;
         }
         @foreach (var table in tables)
         {
-           
             // Wenn der Tisch außerhalb der Karte liegt
             if (table.X < 0 || table.X > 800 - 50 || table.Y < 0 || table.Y > 600 - 50)
             {
@@ -55,4 +54,5 @@
         // Direkt aus DbContext Daten abrufen
         tables = await DbContext.Tables.ToListAsync();
     }
+
 }
