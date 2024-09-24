@@ -135,7 +135,8 @@ foreach (ArticleGroup lCat in ActiveStates.Keys)
       Context.OrderArticles.Add(new()
         {
           Article = lOrderPosition.Key,
-          Amount = lOrderPosition.Value
+          Amount = lOrderPosition.Value,
+          Order = lOrder
         });
     }
     Cart.Clear();

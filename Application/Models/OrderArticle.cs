@@ -8,5 +8,8 @@ public sealed class OrderArticle
     [ForeignKey("Article")]
     public int ArticleId { get; set; }
     public Article Article { get; set; }
+    [ForeignKey("Order")]
+    public int OrderId { get; set; }
+    public Article Order { get; set; }
     public int Amount { get; set; }
 }
