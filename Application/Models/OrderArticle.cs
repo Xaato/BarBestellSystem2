@@ -10,6 +10,6 @@ public sealed class OrderArticle
     public Article Article { get; set; }
     [ForeignKey("Order")]
     public int OrderId { get; set; }
-    public Article Order { get; set; }
+    public Order Order { get; set; }
     public int Amount { get; set; }
 }
