@@ -1,0 +1,55 @@
+@using Application.Models
+@using Microsoft.EntityFrameworkCore
+@inject Application.BarDbContext DbContext
+<div class="restaurant-map position-relative border bg-light" style="width: 800px; height: 600px;">
+    @foreach (var table in _tables)
+    {
+        // Überprüfen, ob der Tisch innerhalb der Karte ist
+        if (table.X >= 0 && table.X <= 800 - 50 && table.Y >= 0 && table.Y <= 600 - 50)
+        {
+            // Tisch innerhalb der Karte
+            <NavLink href=@{$"{NavLinkDestination}/{table.Id}"}>
+                <button class="btn btn-success btn-lg rounded-circle position-absolute"
+                        style="left:@($"{table.X}px"); top:@($"{table.Y}px");">
+                    @table.Name
+                </button>
+            </NavLink>
+        }
+    }
+
+    <!-- Bereich für Tische außerhalb der Karte (rechts neben der Karte) -->
+    <div class="out-of-bounds-tables position-absolute" style="left: 810px; top: 0;">
+        @* Initialisiere die Startposition für Tische außerhalb *@
+        @{
+            var outOfBoundsY = 0;
+        }
+        @foreach (var table in _tables)
+        {
+            // Wenn der Tisch außerhalb der Karte liegt
+            if (table.X < 0 || table.X > 800 - 50 || table.Y < 0 || table.Y > 600 - 50)
+            {
+                <button class="btn btn-danger btn-lg rounded-circle position-relative"
+                        style="left: 0px; top:@($"{outOfBoundsY}px");">
+                    @table.Name
+                </button>
+
+                // Abstand für den nächsten Button setzen (50px Button + 10px Abstand)
+                outOfBoundsY += 60;
+            }
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string NavLinkDestination { get; set; }
+
+    private List<Table> _tables = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Direkt aus DbContext Daten abrufen
+        _tables = await DbContext.Tables.ToListAsync();
+    }
+
+}
