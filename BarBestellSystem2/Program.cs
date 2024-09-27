@@ -1,4 +1,6 @@
 using Application;
+using BarBestellSystem2.Hubs;
+using Microsoft.AspNetCore.ResponseCompression;
 
 namespace BarBestellSystem2;
 
@@ -12,9 +14,15 @@ public static class Program
         builder.Services.AddRazorPages();
         builder.Services.AddServerSideBlazor();
         builder.Services.AddApplication();
+        builder.Services.AddSignalR();
+        builder.Services.AddResponseCompression(opts =>
+        {
+            opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
+                ["application/octet-stream"]);
+        });
         builder.Services.AddScoped<BlazorBootstrap.SortableListJsInterop>();
         var app = builder.Build();
-
+        app.UseResponseCompression();
         // Configure the HTTP request pipeline.
         if (!app.Environment.IsDevelopment())
         {
@@ -31,7 +39,7 @@ public static class Program
 
         app.MapBlazorHub();
         app.MapFallbackToPage("/_Host");
-
+        app.MapHub<NotificationHub>("/notificationHub");
         app.Run();
     }
 }

@@ -1,0 +1,33 @@
+@page "/Notifications"
+@using Microsoft.AspNetCore.SignalR.Client
+@implements IAsyncDisposable
+<h3>Notifications</h3>
+
+
+@code {
+    private HubConnection? hubConnection;
+    protected override async Task OnInitializedAsync()
+    {
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl("https://localhost:5001/notifications")
+            .Build();
+
+        hubConnection.On<string, string>("ReceiveMessage", (userId, message) =>
+        {
+            Console.WriteLine(userId);
+            Console.WriteLine(message);
+        });
+
+        await hubConnection.StartAsync();
+    }
+    public bool IsConnected =>
+        hubConnection?.State == HubConnectionState.Connected;
+    
+    public async ValueTask DisposeAsync()
+    {
+        if (hubConnection is not null)
+        {
+            await hubConnection.DisposeAsync();
+        }
+    }
+}
