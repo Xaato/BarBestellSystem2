@@ -12,7 +12,7 @@ public static class Program
         builder.Services.AddRazorPages();
         builder.Services.AddServerSideBlazor();
         builder.Services.AddApplication();
-
+        builder.Services.AddScoped<BlazorBootstrap.SortableListJsInterop>();
         var app = builder.Build();
 
         // Configure the HTTP request pipeline.

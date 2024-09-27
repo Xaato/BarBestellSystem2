@@ -136,6 +136,9 @@ namespace Application.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("IsCompleted")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("TableId")
                         .HasColumnType("INTEGER");
 
@@ -161,7 +164,10 @@ namespace Application.Migrations
                     b.Property<int>("ArticleId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("OrderId")
+                    b.Property<bool>("IsCompleted")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("OrderId")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
@@ -282,11 +288,15 @@ namespace Application.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Application.Models.Order", null)
+                    b.HasOne("Application.Models.Order", "Order")
                         .WithMany("OrderArticles")
-                        .HasForeignKey("OrderId");
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Article");
+
+                    b.Navigation("Order");
                 });
 
             modelBuilder.Entity("Application.Models.ArticleGroup", b =>

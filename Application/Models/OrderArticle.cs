@@ -12,4 +12,5 @@ public sealed class OrderArticle
     public int OrderId { get; set; }
     public Order Order { get; set; }
     public int Amount { get; set; }
+    public bool IsCompleted { get; set; }
 }
