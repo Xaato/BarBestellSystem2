@@ -12,7 +12,7 @@
     <h2 class="accordion-header" id="headingOne">
       <button class="accordion-button @(CartOpen ? null : "collapsed")" type="button" data-bs-toggle="collapse"
         data-bs-target="#collapseOne" aria-expanded="@CartOpen.ToString()" aria-controls="collapseOne"
-        @onclick="@(e => {CartOpen = !CartOpen;})">
+      @onclick="@(e => {CartOpen = !CartOpen;})">
         Cart
       </button>
     </h2>
@@ -23,7 +23,7 @@
           @foreach (var Item in Cart)
           {
             <button type="button" class="list-group-item list-group-item-action"
-              @onclick="@(e => RemoveFromCart(Item.Key))">
+            @onclick="@(e => RemoveFromCart(Item.Key))">
               @Item.Key.ArticleGroup?.Name / @Item.Key.Name x @Item.Value
             </button>
           }
@@ -52,9 +52,18 @@
           <div class="list-group">
             @foreach (Article Item in Category.Articles.ToArray())
             {
-              <button type="button" class="list-group-item list-group-item-action" @onclick="@(e => AddToCart(Item))">
-                @Item.Name
-              </button>
+              <div class="input-group mb-4">
+                <span class="input-group-text" @onclick="@(e => AddToCart(Item))">@Item.Id</span>
+                <span class="input-group-text" @onclick="@(e => AddToCart(Item))">@Item.Name</span>
+                <input id="@Category.Name-@Item.Name" type="text" class="form-control" aria-label="Notes" @oninput="@(ui => { 
+                if(InputValues.ContainsKey(Item))
+                  InputValues[Item] = ui.Value as string;
+                else
+                  InputValues.Add(Item, ui.Value as string);
+                })">
+                <span class="input-group-text bg-primary"
+                @onclick="@(e => AddToCart(Item))">@Item.Price.ToString("C")</span>
+              </div>
             }
           </div>
         </div>
@@ -67,6 +76,7 @@
 @code {
   string ActiveCategory = string.Empty;
   Dictionary<ArticleGroup, string[]> ActiveStates = new();
+  Dictionary<Article, string> InputValues = new();
   bool CartOpen = false;
   Dictionary<Article, int> Cart = new();
   [Parameter]
@@ -141,5 +151,6 @@ foreach (ArticleGroup lCat in ActiveStates.Keys)
     }
     Cart.Clear();
     Context.SaveChanges();
+    CartOpen = false;
   }
 }
