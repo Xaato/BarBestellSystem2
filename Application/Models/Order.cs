@@ -11,5 +11,6 @@ public sealed class Order
     public DateTime Timestamp { get; set; }
     public bool IsCompleted { get; set; }
     public List<OrderArticle> OrderArticles { get; set; }
+    public string Employee {get;set;}
 
 }
