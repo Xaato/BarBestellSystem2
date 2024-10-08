@@ -1,5 +1,7 @@
 ﻿@using Application.Models
 @using Microsoft.EntityFrameworkCore
+@using Auth0.AspNetCore.Authentication;
+@attribute [Authorize]
 @inject Application.BarDbContext Context
 @page "/ordering/{Table}"
 
