@@ -1,11 +1,12 @@
-@page "/Notifications"
 @using Microsoft.AspNetCore.SignalR.Client
+@using BlazorBootstrap
 @implements IAsyncDisposable
-<h3>Notifications</h3>
 
-
+<Toasts class="p-3" Messages="messages" Placement="ToastsPlacement.TopRight"/>
+<Button Color="ButtonColor.Primary" @onclick="() => ShowMessage(ToastType.Primary)">Primary Toast</Button>
 @code {
     private HubConnection? hubConnection;
+
     protected override async Task OnInitializedAsync()
     {
         hubConnection = new HubConnectionBuilder()
@@ -20,9 +21,10 @@
 
         await hubConnection.StartAsync();
     }
+
     public bool IsConnected =>
         hubConnection?.State == HubConnectionState.Connected;
-    
+
     public async ValueTask DisposeAsync()
     {
         if (hubConnection is not null)
@@ -30,4 +32,16 @@
             await hubConnection.DisposeAsync();
         }
     }
+
+    List<ToastMessage> messages = [];
+
+    private void ShowMessage(ToastType toastType) => messages.Add(CreateToastMessage(toastType));
+
+    private ToastMessage CreateToastMessage(ToastType toastType)
+        => new ToastMessage
+        {
+            Type = toastType,
+            Message = $"Hello, world! This is a simple toast message. DateTime: {DateTime.Now}",
+        };
+
 }

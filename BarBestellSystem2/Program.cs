@@ -13,14 +13,16 @@ public static class Program
         // Add services to the container.
         builder.Services.AddRazorPages();
         builder.Services.AddServerSideBlazor();
+        builder.Services.AddBlazorBootstrap();
         builder.Services.AddApplication();
-        builder.Services.AddSignalR();
+        //builder.Services.AddSignalR();
         builder.Services.AddResponseCompression(opts =>
         {
             opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
                 ["application/octet-stream"]);
         });
         builder.Services.AddScoped<BlazorBootstrap.SortableListJsInterop>();
+        builder.Services.AddScoped<BlazorBootstrap.ToastService>();
         var app = builder.Build();
         app.UseResponseCompression();
         // Configure the HTTP request pipeline.
@@ -39,7 +41,7 @@ public static class Program
 
         app.MapBlazorHub();
         app.MapFallbackToPage("/_Host");
-        app.MapHub<NotificationHub>("/notificationHub");
+        //app.MapHub<NotificationHub>("/notificationHub");
         app.Run();
     }
 }

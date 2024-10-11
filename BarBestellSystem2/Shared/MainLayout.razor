@@ -1,4 +1,7 @@
-﻿@inherits LayoutComponentBase
+﻿@using BlazorBootstrap
+@* @using Microsoft.AspNetCore.SignalR.Client *@
+@* @implements IAsyncDisposable *@
+@inherits LayoutComponentBase
 
 <PageTitle>BarBestellSystem2</PageTitle>
 
@@ -16,4 +19,38 @@
             @Body
         </article>
     </main>
+    <Toasts class="p-3" AutoHide="true" Delay="4000" Placement="ToastsPlacement.TopRight" />
 </div>
+
+@code
+{
+    //private HubConnection? _hubConnection;
+    [Inject] protected ToastService ToastService { get; set; }
+
+    // protected override async Task OnInitializedAsync()
+    // {
+    //     _hubConnection = new HubConnectionBuilder()
+    //         .WithUrl("https://localhost:5001/notifications")
+    //         .Build();
+    //
+    //     _hubConnection.On<string, string>("ReceiveMessage", (userId, message) =>
+    //     {
+    //         Console.WriteLine(userId);
+    //         Console.WriteLine(message);
+    //         ToastService.Notify(new ToastMessage(ToastType.Secondary, message));
+    //     });
+    //
+    //     await _hubConnection.StartAsync();
+    // }
+    //
+    // public bool IsConnected =>
+    //     _hubConnection?.State == HubConnectionState.Connected;
+    //
+    // public async ValueTask DisposeAsync()
+    // {
+    //     if (_hubConnection is not null)
+    //     {
+    //         await _hubConnection.DisposeAsync();
+    //     }
+    // }
+}

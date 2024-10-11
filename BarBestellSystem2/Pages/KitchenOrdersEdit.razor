@@ -25,10 +25,9 @@
 
 @code {
     private List<Order> _orders { get; set; }
-
+    [Inject] protected ToastService ToastService { get; set; }
     protected override async Task OnInitializedAsync()
     {
-        // Direkt aus DbContext Daten abrufen
         _orders = await DbContext.Orders.Include(item => item.OrderArticles).ThenInclude(item => item.Article).ToListAsync();
     }
 
@@ -38,6 +37,14 @@
         Console.WriteLine("SwitchChanged");
         await DbContext.SaveChangesAsync();
         Console.WriteLine("SaveChangesAsync executed");
+        if(IsOrderArticleCompleted(orderArticle))
+        {
+            ToastService.Notify(new ToastMessage(ToastType.Success, "Bestellung fertig"));
+        }
     }
-
+    
+    private bool IsOrderArticleCompleted(OrderArticle orderArticle)
+    {
+        return orderArticle.IsCompleted;
+    }
 }
