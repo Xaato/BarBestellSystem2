@@ -2,6 +2,8 @@ using Application;
 using BarBestellSystem2.Hubs;
 using Microsoft.AspNetCore.ResponseCompression;
 using Auth0.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication;         
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace BarBestellSystem2;
 
@@ -24,6 +26,7 @@ public static class Program
         {
             options.Conventions.AuthorizePage("/TableMap");
             options.Conventions.AuthorizePage("/Ordering");
+            options.Conventions.AuthorizePage("/kitchen/ordersoverview");
         });
 
         builder.Services.AddServerSideBlazor();

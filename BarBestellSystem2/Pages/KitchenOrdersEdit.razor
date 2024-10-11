@@ -2,6 +2,7 @@
 @using Application.Models
 @using Microsoft.EntityFrameworkCore
 @using BlazorBootstrap
+@attribute [Authorize]
 @inject Application.BarDbContext DbContext
 <h3>KitchenTableOrderEdit</h3>
 @foreach (var order in _orders)
