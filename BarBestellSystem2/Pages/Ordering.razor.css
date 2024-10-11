@@ -1,0 +1,11 @@
+.btn-success:active · {
+    transition: 0s all;
+    background-color: darkgreen;
+}
+
+.btn-success:active · {
+    transition: 1s all;
+}
+.badge {
+    float:right;
+}

@@ -1,5 +1,7 @@
 ﻿@using Application.Models
 @using Microsoft.EntityFrameworkCore
+@using Auth0.AspNetCore.Authentication;
+@attribute [Authorize]
 @inject Application.BarDbContext Context
 @page "/ordering/{Table}"
 
@@ -13,7 +15,7 @@
       <button class="accordion-button @(CartOpen ? null : "collapsed")" type="button" data-bs-toggle="collapse"
         data-bs-target="#collapseOne" aria-expanded="@CartOpen.ToString()" aria-controls="collapseOne"
         @onclick="@(e => {CartOpen = !CartOpen;})">
-        Cart
+        Cart (@Username)
       </button>
     </h2>
     <div id="collapseOne" class="accordion-collapse collapse @(CartOpen ? "show" : null)" aria-labelledby="headingOne"
@@ -23,12 +25,15 @@
           @foreach (var Item in Cart)
           {
             <button type="button" class="list-group-item list-group-item-action"
-              @onclick="@(e => RemoveFromCart(Item.Key))">
+            @onclick="@(e => RemoveFromCart(Item.Key))">
               @Item.Key.ArticleGroup?.Name / @Item.Key.Name x @Item.Value
             </button>
           }
         </div>
-        <button type="button" class="btn btn-success mt-2" @onclick="Order">Order</button>
+        <div class="input-group mb-3">
+          <span class="input-group-text">@Cart.Select(item => item.Key.Price * item.Value).Sum().ToString("C")</span>
+          <button type="button" class="btn btn-success" @onclick="Order">Order</button>
+        </div>
       </div>
     </div>
   </div>
@@ -52,9 +57,18 @@
           <div class="list-group">
             @foreach (Article Item in Category.Articles.ToArray())
             {
-              <button type="button" class="list-group-item list-group-item-action" @onclick="@(e => AddToCart(Item))">
-                @Item.Name
-              </button>
+              <div class="input-group mb-4">
+                <span class="input-group-text" @onclick="@(e => AddToCart(Item))">@Item.Id</span>
+                <span class="input-group-text" @onclick="@(e => AddToCart(Item))">@Item.Name</span>
+                <input id="@Category.Name-@Item.Name" type="text" class="form-control" aria-label="Notes" @oninput="@(ui => { 
+                if(InputValues.ContainsKey(Item))
+                  InputValues[Item] = ui.Value as string;
+                else
+                  InputValues.Add(Item, ui.Value as string);
+                })">
+                <span class="input-group-text bg-primary"
+                @onclick="@(e => AddToCart(Item))">@Item.Price.ToString("C")</span>
+              </div>
             }
           </div>
         </div>
@@ -67,10 +81,27 @@
 @code {
   string ActiveCategory = string.Empty;
   Dictionary<ArticleGroup, string[]> ActiveStates = new();
+  Dictionary<Article, string> InputValues = new();
   bool CartOpen = false;
   Dictionary<Article, int> Cart = new();
   [Parameter]
   public string? Table { get; set; }
+
+  [CascadingParameter]
+  public Task<AuthenticationState> AuthenticationStateTask { get; set; }
+
+  private string Username = "";
+
+  protected override async Task OnInitializedAsync()
+  {
+    if (AuthenticationStateTask is not null)
+    {
+      var state = await AuthenticationStateTask;
+
+      Username = state?.User?.Identity?.Name ?? string.Empty;
+    }
+  }
+
 
   private ArticleGroup[] GetCategories()
   {
@@ -132,14 +163,19 @@ foreach (ArticleGroup lCat in ActiveStates.Keys)
       }).Entity;
     foreach (var lOrderPosition in Cart)
     {
-      Context.OrderArticles.Add(new()
+      var OrderArt = Context.OrderArticles.Add(new()
         {
           Article = lOrderPosition.Key,
           Amount = lOrderPosition.Value,
           Order = lOrder
-        });
+        }).Entity;
+      if (InputValues.ContainsKey(OrderArt.Article))
+        OrderArt.Notes = InputValues[OrderArt.Article];
+      lOrder.Employee = Username;
+
     }
     Cart.Clear();
     Context.SaveChanges();
+    CartOpen = false;
   }
 }

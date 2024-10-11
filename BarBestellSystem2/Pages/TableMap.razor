@@ -1,6 +1,8 @@
 ﻿@page "/TableMap"
 @inject Application.BarDbContext DbContext
 @using Microsoft.EntityFrameworkCore
+@using Auth0.AspNetCore.Authentication;
+@attribute [Authorize]
 @using Table = Application.Models.Table
 
 <pageTitle>Restaurantkarte</pageTitle>
