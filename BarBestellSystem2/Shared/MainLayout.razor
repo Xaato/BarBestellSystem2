@@ -1,4 +1,6 @@
 ﻿@inherits LayoutComponentBase
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
 
 <PageTitle>BarBestellSystem2</PageTitle>
 
@@ -9,6 +11,8 @@
 
     <main>
         <div class="top-row px-4">
+            <a class="nav-link" href="/Logout">Logout</a>
+
             <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
         </div>
 
@@ -17,3 +21,17 @@
         </article>
     </main>
 </div>
+@code
+{
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (!user.Identity.IsAuthenticated)
+        {
+            // Redirect to login page
+            NavigationManager.NavigateTo("Login");
+        }
+    }
+}
