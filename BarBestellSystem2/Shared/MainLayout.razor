@@ -1,6 +1,8 @@
 ﻿@using BlazorBootstrap
 @* @using Microsoft.AspNetCore.SignalR.Client *@
 @* @implements IAsyncDisposable *@
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
 @inherits LayoutComponentBase
 
 <PageTitle>BarBestellSystem2</PageTitle>
@@ -26,6 +28,18 @@
 {
     //private HubConnection? _hubConnection;
     [Inject] protected ToastService ToastService { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (!user.Identity.IsAuthenticated)
+        {
+            // Redirect to login page
+            NavigationManager.NavigateTo("Login");
+        }
+    }
 
     // protected override async Task OnInitializedAsync()
     // {

@@ -18,7 +18,6 @@ public static class Program
         {
             options.Domain = builder.Configuration["Auth0:Domain"];
             options.ClientId = builder.Configuration["Auth0:ClientId"];
-            options.Scope = "openid profile email";
         });
 
         // Razor Pages und Seiten mit Authentifizierung konfigurieren

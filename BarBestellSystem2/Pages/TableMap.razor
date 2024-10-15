@@ -3,12 +3,13 @@
 @using Microsoft.EntityFrameworkCore
 @using Auth0.AspNetCore.Authentication;
 @attribute [Authorize]
+
 @using Table = Application.Models.Table
 
 <pageTitle>Restaurantkarte</pageTitle>
 
 <h1>Restaurantkarte</h1>
-
+@Username
 <div class="restaurant-map position-relative border bg-light" style="width: 800px; height: 600px;">
     @foreach (var table in tables)
     {
@@ -51,11 +52,18 @@
 
 @code {
     private List<Table> tables = [];
-
+    [CascadingParameter]
+    public Task<AuthenticationState> AuthenticationStateTask { get; set; }
+    private string Username = "";
     protected override async Task OnInitializedAsync()
     {
-        // Direkt aus DbContext Daten abrufen
+        var state = await AuthenticationStateTask;
+
+        Username = state.User.Identity.Name ?? string.Empty;
+
         tables = await DbContext.Tables.ToListAsync();
+        await base.OnInitializedAsync();
+        // Direkt aus DbContext Daten abrufen
     }
 
 }
