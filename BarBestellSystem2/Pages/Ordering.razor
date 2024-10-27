@@ -1,8 +1,10 @@
-﻿@using Application.Models
+﻿@using System.Security.Claims
+@using Application
+@using Application.Models
 @using Microsoft.EntityFrameworkCore
-@using Auth0.AspNetCore.Authentication;
 @attribute [Authorize]
-@inject Application.BarDbContext Context
+@implements IDisposable
+@inject IDbContextFactory<BarDbContext> DbFactory
 @page "/ordering/{Table}"
 
 <PageTitle>Order</PageTitle>
@@ -79,6 +81,7 @@
 
 
 @code {
+  private BarDbContext? Context { get; set; }
   string ActiveCategory = string.Empty;
   Dictionary<ArticleGroup, string[]> ActiveStates = new();
   Dictionary<Article, string> InputValues = new();
@@ -91,6 +94,7 @@
   public Task<AuthenticationState> AuthenticationStateTask { get; set; }
 
   private string Username = "";
+  private string UserId { get; set; }
 
   protected override async Task OnInitializedAsync()
   {
@@ -99,10 +103,11 @@
       var state = await AuthenticationStateTask;
 
       Username = state?.User?.Identity?.Name ?? string.Empty;
+      UserId = state?.User?.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
     }
+    Context = await DbFactory.CreateDbContextAsync();
   }
-
-
+  public void Dispose() => Context?.Dispose();
   private ArticleGroup[] GetCategories()
   {
     if (ActiveStates.Keys.Count() == 0)
@@ -155,12 +160,11 @@ foreach (ArticleGroup lCat in ActiveStates.Keys)
   {
     if (!int.TryParse(Table, out _))
       return;
-
     Order lOrder = Context.Orders.Add(new()
-      {
-        TableId = int.Parse(Table),
-        Timestamp = DateTime.Now
-      }).Entity;
+    {
+      TableId = int.Parse(Table),
+      Timestamp = DateTime.Now
+    }).Entity;
     foreach (var lOrderPosition in Cart)
     {
       var OrderArt = Context.OrderArticles.Add(new()
@@ -171,7 +175,7 @@ foreach (ArticleGroup lCat in ActiveStates.Keys)
         }).Entity;
       if (InputValues.ContainsKey(OrderArt.Article))
         OrderArt.Notes = InputValues[OrderArt.Article];
-      lOrder.Employee = Username;
+      lOrder.Employee = UserId;
 
     }
     Cart.Clear();
