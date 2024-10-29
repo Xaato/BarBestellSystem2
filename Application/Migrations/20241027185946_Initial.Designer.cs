@@ -11,13 +11,13 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Application.Migrations
 {
     [DbContext(typeof(BarDbContext))]
-    [Migration("20240927095047_Initial")]
+    [Migration("20241027185946_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "6.0.33");
+            modelBuilder.HasAnnotation("ProductVersion", "6.0.35");
 
             modelBuilder.Entity("Application.Models.Article", b =>
                 {
@@ -138,6 +138,10 @@ namespace Application.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("Employee")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<bool>("IsCompleted")
                         .HasColumnType("INTEGER");
 
@@ -168,6 +172,9 @@ namespace Application.Migrations
 
                     b.Property<bool>("IsCompleted")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("OrderId")
                         .HasColumnType("INTEGER");

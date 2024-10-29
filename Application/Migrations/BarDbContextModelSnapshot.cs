@@ -15,7 +15,7 @@ namespace Application.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "6.0.33");
+            modelBuilder.HasAnnotation("ProductVersion", "6.0.35");
 
             modelBuilder.Entity("Application.Models.Article", b =>
                 {
@@ -136,6 +136,10 @@ namespace Application.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("Employee")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<bool>("IsCompleted")
                         .HasColumnType("INTEGER");
 
@@ -166,6 +170,9 @@ namespace Application.Migrations
 
                     b.Property<bool>("IsCompleted")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("OrderId")
                         .HasColumnType("INTEGER");
