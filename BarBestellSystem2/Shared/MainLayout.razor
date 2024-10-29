@@ -1,70 +1,68 @@
-﻿@using BlazorBootstrap
-@* @using Microsoft.AspNetCore.SignalR.Client *@
-@* @implements IAsyncDisposable *@
-@inject AuthenticationStateProvider AuthenticationStateProvider
+﻿@inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager
 @inherits LayoutComponentBase
-
+@using System.Security.Claims
+@using Microsoft.AspNetCore.SignalR.Client
+@implements IAsyncDisposable
 <PageTitle>BarBestellSystem2</PageTitle>
 
 <div class="page">
     <div class="sidebar">
-        <NavMenu />
+        <NavMenu/>
     </div>
 
     <main>
         <div class="top-row px-4">
-            <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
+            <a href="Logout">Logout</a>
         </div>
 
         <article class="content px-4">
             @Body
         </article>
     </main>
-    <Toasts class="p-3" AutoHide="true" Delay="4000" Placement="ToastsPlacement.TopRight" />
+    <Toasts class="p-3" AutoHide="false" Delay="4000" Placement="ToastsPlacement.BottomRight"/>
 </div>
 
 @code
 {
-    //private HubConnection? _hubConnection;
-    [Inject] protected ToastService ToastService { get; set; }
+    private HubConnection? _hubConnection;
+    [Inject] protected ToastService ToastService { get; set; } = null!;
+
+    public bool IsConnected =>
+        _hubConnection?.State == HubConnectionState.Connected;
+
+    public ClaimsPrincipal? User { get; set; }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_hubConnection is not null)
+        {
+            await _hubConnection.DisposeAsync();
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
+        User = authState.User;
 
-        if (!user.Identity.IsAuthenticated)
+        if (!User.Identity.IsAuthenticated)
         {
-            // Redirect to login page
             NavigationManager.NavigateTo("Login");
         }
-    }
 
-    // protected override async Task OnInitializedAsync()
-    // {
-    //     _hubConnection = new HubConnectionBuilder()
-    //         .WithUrl("https://localhost:5001/notifications")
-    //         .Build();
-    //
-    //     _hubConnection.On<string, string>("ReceiveMessage", (userId, message) =>
-    //     {
-    //         Console.WriteLine(userId);
-    //         Console.WriteLine(message);
-    //         ToastService.Notify(new ToastMessage(ToastType.Secondary, message));
-    //     });
-    //
-    //     await _hubConnection.StartAsync();
-    // }
-    //
-    // public bool IsConnected =>
-    //     _hubConnection?.State == HubConnectionState.Connected;
-    //
-    // public async ValueTask DisposeAsync()
-    // {
-    //     if (_hubConnection is not null)
-    //     {
-    //         await _hubConnection.DisposeAsync();
-    //     }
-    // }
+        _hubConnection = new HubConnectionBuilder()
+            .WithUrl(NavigationManager.ToAbsoluteUri("/notificationHub"))
+            .Build();
+
+        _hubConnection.On<string, string>("ReceiveNotification", (userId, message) =>
+        {
+            if (User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value == userId)
+            {
+                InvokeAsync(() => ToastService.Notify(new ToastMessage(ToastType.Success, message)));
+            }
+        });
+
+        await _hubConnection.StartAsync();
+    }
 }

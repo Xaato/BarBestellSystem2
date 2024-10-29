@@ -1,51 +1,87 @@
 @page "/kitchen/ordersoverview"
+@using Application
 @using Application.Models
-@using Microsoft.EntityFrameworkCore
-@using BlazorBootstrap
 @attribute [Authorize]
-@inject Application.BarDbContext DbContext
 <h3>KitchenTableOrderEdit</h3>
-@foreach (var order in _orders)
+@foreach (var order in Orders)
 {
     <Card>
         <CardBody>
             <CardTitle>
                 Bestellnummer: @order.Id | Tisch: @order.TableId
             </CardTitle>
-            <SortableList TItem="OrderArticle"
-                          Data="order.OrderArticles"
-                          Context="item">
-                <ItemTemplate>
-                    @item.Article.Name @item.Amount x 
-                    <Switch Label="Fertig?" Value="item.IsCompleted" ValueExpression="() => item.IsCompleted" ValueChanged="@(value => SwitchChanged(value, item))"/>
-                </ItemTemplate>
-            </SortableList>
+            <div class="accordion-body">
+                <div class="list-group">
+                    @foreach (var orderArticle in order.OrderArticles)
+                    {
+                        <div class="order-article">
+                            <p>
+                                @orderArticle.Article.Name @orderArticle.Amount x
+                            </p>
+                            <Switch Label="Fertig?" Disabled="Loading"
+                                    Value="orderArticle.IsCompleted"
+                                    ValueExpression="() => orderArticle.IsCompleted"
+                                    ValueChanged="@(value => SwitchChanged(value, orderArticle, order))"/>
+                        </div>
+                    }
+                </div>
+            </div>
         </CardBody>
     </Card>
 }
 
+
 @code {
-    private List<Order> _orders { get; set; }
-    [Inject] protected ToastService ToastService { get; set; }
+
+    [Inject] private BarService BarService { get; set; } = null!;
+    private List<Order> Orders { get; set; } = [];
+    private bool Loading { get; set; }
+
     protected override async Task OnInitializedAsync()
     {
-        _orders = await DbContext.Orders.Include(item => item.OrderArticles).ThenInclude(item => item.Article).ToListAsync();
+        await LoadOrdersAsync();
+        await base.OnInitializedAsync();
     }
 
-    private async void SwitchChanged(bool value, OrderArticle orderArticle)
+    private async Task LoadOrdersAsync()
     {
-        orderArticle.IsCompleted = value;
-        Console.WriteLine("SwitchChanged");
-        await DbContext.SaveChangesAsync();
-        Console.WriteLine("SaveChangesAsync executed");
-        if(IsOrderArticleCompleted(orderArticle))
+        if (Loading)
         {
-            ToastService.Notify(new ToastMessage(ToastType.Success, "Bestellung fertig"));
+            return;
+        }
+
+        Loading = true;
+        try
+        {
+            Orders = await BarService.LoadOrdersAsync();
+        }
+        finally
+        {
+            Loading = false;
         }
     }
-    
-    private bool IsOrderArticleCompleted(OrderArticle orderArticle)
+
+    private async Task SwitchChanged(bool value, OrderArticle orderArticle, Order order)
     {
-        return orderArticle.IsCompleted;
+        orderArticle.IsCompleted = value;
+
+        Loading = true;
+        try
+        {
+            await BarService.UpdateOrderArticleAsync(orderArticle);
+            if (order.OrderArticles.All(oa => oa.IsCompleted))
+            {
+                order.IsCompleted = true;
+                await BarService.UpdateOrderAsync(order);
+            }
+        }
+        finally
+        {
+            Loading = false;
+        }
+
+        await LoadOrdersAsync();
+        StateHasChanged();
     }
+
 }

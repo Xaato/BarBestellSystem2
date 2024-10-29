@@ -10,31 +10,16 @@
 <div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
     <nav class="flex-column">
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="oi oi-home" aria-hidden="true"></span> Home
+            <NavLink class="nav-link px-2" href="TableMap">
+                <Icon Name="IconName.Android2" Size="IconSize.x3"></Icon>
+                <span class="mx-2">Tische</span>
             </NavLink>
         </div>
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="oi oi-plus" aria-hidden="true"></span> Counter
+            <NavLink class="nav-link px-2" href="kitchen/ordersoverview">
+                <Icon Name="IconName.Android2" Size="IconSize.x3"></Icon>
+                <span class="mx-2">Küche</span>
             </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="fetchdata">
-                <span class="oi oi-list-rich" aria-hidden="true"></span> Fetch data
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="TableMap">
-                <span class="oi oi-list-rich" aria-hidden="true"></span> Tabele
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="kitchen/ordersoverview">
-                <span class="oi oi-list-rich" aria-hidden="true"></span> Küche
-            </NavLink>
-            <a class="nav-link" href="/Account/Logout">Logout</a>
-            <a class="nav-link" href="/Account/Login">Login</a>
         </div>
     </nav>
 </div>
@@ -48,4 +33,5 @@
     {
         collapseNavMenu = !collapseNavMenu;
     }
+
 }

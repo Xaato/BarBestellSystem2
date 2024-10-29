@@ -1,9 +1,7 @@
 using Application;
-using BarBestellSystem2.Hubs;
+using Application.Hubs;
 using Microsoft.AspNetCore.ResponseCompression;
 using Auth0.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication;         
-using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace BarBestellSystem2;
 
@@ -19,7 +17,7 @@ public static class Program
             options.Domain = builder.Configuration["Auth0:Domain"];
             options.ClientId = builder.Configuration["Auth0:ClientId"];
         });
-
+        builder.Services.AddHttpContextAccessor();
         // Razor Pages und Seiten mit Authentifizierung konfigurieren
         builder.Services.AddRazorPages(options =>
         {
@@ -37,8 +35,8 @@ public static class Program
             opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
                 ["application/octet-stream"]);
         });
-        builder.Services.AddScoped<BlazorBootstrap.SortableListJsInterop>();
         builder.Services.AddScoped<BlazorBootstrap.ToastService>();
+        builder.Services.AddScoped<BarService>();
         var app = builder.Build();
         app.UseResponseCompression();
         // Configure the HTTP request pipeline.

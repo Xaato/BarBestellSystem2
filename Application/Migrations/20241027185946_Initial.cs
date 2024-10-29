@@ -66,7 +66,8 @@ namespace Application.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     TableId = table.Column<int>(type: "INTEGER", nullable: false),
                     Timestamp = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    IsCompleted = table.Column<bool>(type: "INTEGER", nullable: false)
+                    IsCompleted = table.Column<bool>(type: "INTEGER", nullable: false),
+                    Employee = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -88,7 +89,8 @@ namespace Application.Migrations
                     ArticleId = table.Column<int>(type: "INTEGER", nullable: false),
                     OrderId = table.Column<int>(type: "INTEGER", nullable: false),
                     Amount = table.Column<int>(type: "INTEGER", nullable: false),
-                    IsCompleted = table.Column<bool>(type: "INTEGER", nullable: false)
+                    IsCompleted = table.Column<bool>(type: "INTEGER", nullable: false),
+                    Notes = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
