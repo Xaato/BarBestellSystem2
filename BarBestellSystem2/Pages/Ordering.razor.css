@@ -15,4 +15,5 @@
 }
 .input-group span {
     transition: background .2s;
+    cursor: pointer;
 }

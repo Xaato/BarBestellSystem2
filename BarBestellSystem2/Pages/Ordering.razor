@@ -145,6 +145,9 @@
       ArticleCss[Article] = "clicked";
     else
       ArticleCss.Add(Article, "clicked");
+
+    if(InputValues.ContainsKey(Article))
+      InputValues[Article] = string.Empty;
     
     StateHasChanged();
 
