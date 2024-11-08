@@ -9,3 +9,11 @@
 .badge {
     float:right;
 }
+
+.clicked span {
+    background: green;
+}
+.input-group span {
+    transition: background .2s;
+    cursor: pointer;
+}

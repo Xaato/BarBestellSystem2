@@ -1,6 +1,7 @@
 ﻿@using System.Security.Claims
 @using Application
 @using Application.Models
+@using Microsoft.AspNetCore.SignalR.Client
 @using Microsoft.EntityFrameworkCore
 @attribute [Authorize]
 @implements IDisposable
@@ -27,13 +28,13 @@
           @foreach (var Item in Cart)
           {
             <button type="button" class="list-group-item list-group-item-action"
-            @onclick="@(e => RemoveFromCart(Item.Key))">
-              @Item.Key.ArticleGroup?.Name / @Item.Key.Name x @Item.Value
+            @onclick="@(e => RemoveFromCart(Item))">
+              @Item.Article.ArticleGroup?.Name / @Item.Article.Name @FormatNotes(Item) x @Item.Amount
             </button>
           }
         </div>
         <div class="input-group mb-3">
-          <span class="input-group-text">@Cart.Select(item => item.Key.Price * item.Value).Sum().ToString("C")</span>
+          <span class="input-group-text">@Cart.Select(item => item.Article.Price * item.Amount).Sum().ToString("C")</span>
           <button type="button" class="btn btn-success" @onclick="Order">Order</button>
         </div>
       </div>
@@ -59,9 +60,9 @@
           <div class="list-group">
             @foreach (Article Item in Category.Articles.ToArray())
             {
-              <div class="input-group mb-4">
-                <span class="input-group-text" @onclick="@(e => AddToCart(Item))">@Item.Id</span>
-                <span class="input-group-text" @onclick="@(e => AddToCart(Item))">@Item.Name</span>
+              <div class="input-group mb-4 @GetArticleCss(Item)">
+                <span class="input-group-text" @onclick="@(e => AddToCart(Item, getInputString(Item)))">@Item.Id</span>
+                <span class="input-group-text" @onclick="@(e => AddToCart(Item, getInputString(Item)))">@Item.Name</span>
                 <input id="@Category.Name-@Item.Name" type="text" class="form-control" aria-label="Notes" @oninput="@(ui => { 
                 if(InputValues.ContainsKey(Item))
                   InputValues[Item] = ui.Value as string;
@@ -69,7 +70,7 @@
                   InputValues.Add(Item, ui.Value as string);
                 })">
                 <span class="input-group-text bg-primary"
-                @onclick="@(e => AddToCart(Item))">@Item.Price.ToString("C")</span>
+                @onclick="@(e => AddToCart(Item, getInputString(Item)))">@Item.Price.ToString("C")</span>
               </div>
             }
           </div>
@@ -81,12 +82,14 @@
 
 
 @code {
+  [CascadingParameter(Name = "test")] private HubConnection HubConnection { get; set; } = null!;
   private BarDbContext? Context { get; set; }
   string ActiveCategory = string.Empty;
   Dictionary<ArticleGroup, string[]> ActiveStates = new();
   Dictionary<Article, string> InputValues = new();
+  Dictionary<Article, string> ArticleCss = new();
   bool CartOpen = false;
-  Dictionary<Article, int> Cart = new();
+  List<CartItem> Cart = new();
   [Parameter]
   public string? Table { get; set; }
 
@@ -102,7 +105,7 @@
     {
       var state = await AuthenticationStateTask;
 
-      Username = state?.User?.Identity?.Name ?? string.Empty;
+      Username = state?.User?.Claims?.Where(item => item.Type.Equals(System.Security.Claims.ClaimTypes.GivenName))?.Select(c => c.Value).FirstOrDefault() ?? state?.User?.Identity?.Name ?? string.Empty;
       UserId = state?.User?.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
     }
     Context = await DbFactory.CreateDbContextAsync();
@@ -116,16 +119,6 @@
       {
         ActiveStates.Add(lCat, ["", "collapsed"]);
       }
-      @*
-ActiveStates.Add(new ArticleGroup() { Name = "Nicht-alkoholisch", Articles = new List<Article>() }, ["", "collapsed"]);
-ActiveStates.Add(new ArticleGroup() { Name = "Bier", Articles = new List<Article>() }, ["", "collapsed"]);
-ActiveStates.Add(new ArticleGroup() { Name = "Wein", Articles = new List<Article>() }, ["", "collapsed"]);
-foreach (ArticleGroup lCat in ActiveStates.Keys)
-{
-(lCat.Articles as List<Article>)?.Add(new Article() { Name = "Test1", ArticleGroup = lCat});
-(lCat.Articles as List<Article>)?.Add(new Article() { Name = "Test2", ArticleGroup = lCat });
-(lCat.Articles as List<Article>)?.Add(new Article() { Name = "Test3", ArticleGroup = lCat });
-} *@
     }
     return ActiveStates.Keys.ToArray() ?? [];
   }
@@ -141,20 +134,40 @@ foreach (ArticleGroup lCat in ActiveStates.Keys)
     }
     StateHasChanged();
   }
-  private void AddToCart(Article Article)
+  private void AddToCart(Article Article, string Note)
   {
-    if (Cart.Keys.Contains(Article))
-      Cart[Article]++;
+    CartItem lItem = Cart.FirstOrDefault(item => item.Article.Id == Article.Id && item.Notes == Note);
+    if(lItem == null) {
+      lItem = new CartItem() {Article = Article, Amount = 0, Notes = Note};
+      Cart.Add(lItem);
+    }
+    lItem.Amount++;
+    
+    if(ArticleCss.ContainsKey(Article))
+      ArticleCss[Article] = "clicked";
     else
-      Cart.Add(Article, 1);
+      ArticleCss.Add(Article, "clicked");
+
+    if(InputValues.ContainsKey(Article))
+      InputValues[Article] = string.Empty;
+    
+    StateHasChanged();
+
+    Task lT = Task.Run(async delegate {
+      await Task.Delay(200);
+      if(ArticleCss.ContainsKey(Article))
+        ArticleCss[Article] = string.Empty;
+      InvokeAsync(StateHasChanged);
+    });
   }
-  private void RemoveFromCart(Article Article)
+  private void RemoveFromCart(CartItem CartItem)
   {
-    if (Cart.Keys.Contains(Article))
-      if (Cart[Article] > 1)
-        Cart[Article]--;
+    if(Cart.Contains(CartItem)) {
+      if(CartItem.Amount > 1)
+        CartItem.Amount--;
       else
-        Cart.Remove(Article);
+        Cart.Remove(CartItem);
+    }
   }
   private void Order()
   {
@@ -169,17 +182,40 @@ foreach (ArticleGroup lCat in ActiveStates.Keys)
     {
       var OrderArt = Context.OrderArticles.Add(new()
         {
-          Article = lOrderPosition.Key,
-          Amount = lOrderPosition.Value,
+          Article = lOrderPosition.Article,
+          Amount = lOrderPosition.Amount,
+          Notes = lOrderPosition.Notes,
           Order = lOrder
         }).Entity;
-      if (InputValues.ContainsKey(OrderArt.Article))
-        OrderArt.Notes = InputValues[OrderArt.Article];
       lOrder.Employee = UserId;
-
     }
     Cart.Clear();
     Context.SaveChanges();
+    HubConnection.InvokeAsync("NewOrderPlaced");
     CartOpen = false;
+  }
+  private string FormatNotes(CartItem Artik) {
+    if(Artik.Notes != string.Empty)
+      return $"({Artik.Notes})";
+    else
+      return string.Empty;
+  }
+  private string GetArticleCss(Article Artik) {
+    if(ArticleCss.ContainsKey(Artik))
+      return ArticleCss[Artik];
+    else
+      return string.Empty;
+  }
+  private string getInputString(Article Artik) {
+    if(InputValues.ContainsKey(Artik))
+      return InputValues[Artik];
+    else
+      return string.Empty;
+  }
+
+  public class CartItem {
+    public Article Article {get;set;}
+    public string Notes {get;set;}
+    public int Amount {get;set;}
   }
 }

@@ -1,6 +1,7 @@
 @page "/kitchen/ordersoverview"
 @using Application
 @using Application.Models
+@using Microsoft.AspNetCore.SignalR.Client
 @attribute [Authorize]
 <h3>Küche - Bestellübersicht</h3>
 @foreach (var order in Orders)
@@ -32,6 +33,7 @@
 
 
 @code {
+    [CascadingParameter(Name = "test")] private HubConnection HubConnection { get; set; } = null!;
 
     [Inject] private BarService BarService { get; set; } = null!;
     private List<Order> Orders { get; set; } = [];
@@ -40,6 +42,11 @@
     protected override async Task OnInitializedAsync()
     {
         await LoadOrdersAsync();
+        HubConnection.On("UpdateOrderList", () =>
+        {
+            InvokeAsync(async () => await LoadOrdersAsync());
+            InvokeAsync(StateHasChanged);
+        });
         await base.OnInitializedAsync();
     }
 

@@ -15,17 +15,19 @@
         <div class="top-row px-4">
             <a href="Logout">Logout</a>
         </div>
+        <CascadingValue Value="_hubConnection" Name="test">
+            <article class="content px-4">
+                @Body
+            </article>
+        </CascadingValue>
 
-        <article class="content px-4">
-            @Body
-        </article>
     </main>
     <Toasts class="p-3" AutoHide="false" Delay="4000" Placement="ToastsPlacement.BottomRight"/>
 </div>
 
 @code
 {
-    private HubConnection? _hubConnection;
+    public HubConnection? _hubConnection { get; set; }
     [Inject] protected ToastService ToastService { get; set; } = null!;
 
     public bool IsConnected =>
