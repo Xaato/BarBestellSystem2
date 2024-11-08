@@ -1,0 +1,27 @@
+﻿@page "/AdminPage/Articles"
+@inject Application.BarDbContext DbContext
+@using Microsoft.EntityFrameworkCore
+@using Auth0.AspNetCore.Authentication
+@attribute [Authorize]
+
+
+<ul class="nav nav-tabs">
+    <li class="nav-item">
+        <NavLink class="nav-link" href="/AdminPage/Tables" activeClass="active">Tische</NavLink>
+    </li>
+    <li class="nav-item">
+        <NavLink class="nav-link" href="/AdminPage/Articles" activeClass="active">Artikel</NavLink>
+    </li>
+    <li class="nav-item">
+        <NavLink class="nav-link" href="/AdminPage/Users" activeClass="active">Benutzer</NavLink>
+    </li>
+</ul>
+
+<pageTitle>Admin - Artikelverwaltung</pageTitle>
+
+<h2>Artikel</h2>
+
+@code {
+
+}
+

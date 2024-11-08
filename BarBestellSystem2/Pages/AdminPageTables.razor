@@ -1,0 +1,150 @@
+﻿@page "/AdminPage/Tables"
+@inject Application.BarDbContext DbContext
+@using Microsoft.EntityFrameworkCore
+@using Auth0.AspNetCore.Authentication
+@attribute [Authorize]
+
+@using Application.Models
+
+<ul class="nav nav-tabs">
+    <li class="nav-item">
+        <NavLink class="nav-link" href="/AdminPage/Tables" activeClass="active">Tische</NavLink>
+    </li>
+    <li class="nav-item">
+        <NavLink class="nav-link" href="/AdminPage/Articles" activeClass="active">Artikel</NavLink>
+    </li>
+    <li class="nav-item">
+        <NavLink class="nav-link" href="/AdminPage/Users" activeClass="active">Benutzer</NavLink>
+    </li>
+</ul>
+
+<pageTitle>Admin - Tischverwaltung</pageTitle>
+
+<h2>Tischverwaltung</h2>
+
+<div>
+    <h4>Bestehende Tische</h4>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>X</th>
+                <th>Y</th>
+                <th>Aktionen</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var table in tables)
+            {
+                <tr>
+                    <td>@table.Name</td>
+                    <td>@table.X</td>
+                    <td>@table.Y</td>
+                    <td>
+                        <!--<button class="btn btn-sm btn-primary" @onclick="() => EditTable(table.Id)">Bearbeiten</button>-->
+                        <button class="btn btn-sm btn-danger" @onclick="() => DeleteTable(table.Id)">Löschen</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<div>
+    <h4>Vereinfachte Karte</h4>
+    <div class="map-container" style="position: relative; width: 300px; height: 300px; border: 1px solid #ccc;">
+        @{
+            var scaleFactor = 0.375; // Beispiel: 300px / 800px = 0.375, wenn die originale Karte 800px breit ist
+        }
+
+        @foreach (var table in tables)
+        {
+            var scaledX = table.X * scaleFactor;
+            var scaledY = table.Y * scaleFactor;
+
+            <button class="table-btn"
+                    style="position: absolute; left:@($"{scaledX}px"); top:@($"{scaledY}px"); width: 20px; height: 20px;">
+                @table.Name
+            </button>
+        }
+    </div>
+</div>
+
+<div>
+    <h4>Neuen Tisch hinzufügen</h4>
+    <form @onsubmit="AddTable">
+        <div class="form-group">
+            <label for="Name">Name:</label>
+            <input type="text" id="Name" @bind="newTableName" class="form-control" required />
+        </div>
+        <div class="form-group">
+            <label for="X">X-Position:</label>
+            <input type="number" id="X" @bind="newTableX" class="form-control" required />
+        </div>
+        <div class="form-group">
+            <label for="Y">Y-Position:</label>
+            <input type="number" id="Y" @bind="newTableY" class="form-control" required />
+        </div>
+        <button type="submit" class="btn btn-success">Hinzufügen</button>
+    </form>
+</div>
+
+
+<style>
+    .table-btn {
+        background-color: lightblue;
+        border: none;
+        border-radius: 5px;
+    }
+</style>
+
+@code {
+    private List<Table> tables = new List<Table>();
+    private string newTableName;
+    private int newTableX;
+    private int newTableY;
+
+    protected override async Task OnInitializedAsync()
+    {
+        tables = await DbContext.Tables.ToListAsync();
+    }
+
+    public async Task AddTable()
+    {
+        var newTable = new Table
+            {
+                Name = newTableName,
+                X = newTableX,
+                Y = newTableY
+            };
+        DbContext.Tables.Add(newTable);
+        await DbContext.SaveChangesAsync();
+        tables = await DbContext.Tables.ToListAsync();
+    }
+/*
+    public async void EditTable(int id)
+    {
+        var table = DbContext.Tables.FirstOrDefault(t => t.Id == id);
+        if (table != null)
+        {
+            table.Name = newTableName;
+            table.X = newTableX;
+            table.Y = newTableY;
+            DbContext.Tables.Add(table);
+            await DbContext.SaveChangesAsync();
+            tables = await DbContext.Tables.ToListAsync();
+        }
+    }
+    */
+
+    public async Task DeleteTable(int id)
+    {
+        var table = await DbContext.Tables.FindAsync(id);
+        if (table != null)
+        {
+            DbContext.Tables.Remove(table);
+            await DbContext.SaveChangesAsync();
+            tables = await DbContext.Tables.ToListAsync();
+        }
+    }
+}
