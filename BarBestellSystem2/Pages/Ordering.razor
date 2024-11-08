@@ -1,6 +1,7 @@
 ﻿@using System.Security.Claims
 @using Application
 @using Application.Models
+@using Microsoft.AspNetCore.SignalR.Client
 @using Microsoft.EntityFrameworkCore
 @attribute [Authorize]
 @implements IDisposable
@@ -81,6 +82,7 @@
 
 
 @code {
+  [CascadingParameter(Name = "test")] private HubConnection HubConnection { get; set; } = null!;
   private BarDbContext? Context { get; set; }
   string ActiveCategory = string.Empty;
   Dictionary<ArticleGroup, string[]> ActiveStates = new();
@@ -189,6 +191,7 @@
     }
     Cart.Clear();
     Context.SaveChanges();
+    HubConnection.InvokeAsync("NewOrderPlaced");
     CartOpen = false;
   }
   private string FormatNotes(CartItem Artik) {

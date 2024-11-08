@@ -8,4 +8,8 @@ public class NotificationHub : Hub
     {
         await Clients.All.SendAsync("ReceiveNotification", userId, message);
     }
+    public async Task NewOrderPlaced()
+    {
+        await Clients.All.SendAsync("UpdateOrderList");
+    }
 }
