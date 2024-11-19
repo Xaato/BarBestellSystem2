@@ -52,15 +52,15 @@
 
 <div>
     <h4>Vereinfachte Karte</h4>
-    <div class="map-container" style="position: relative; width: 300px; height: 300px; border: 1px solid #ccc;">
+    <div class="map-container" style="position: relative; width: 200px; height: 150px; border: 1px solid #ccc;">
         @{
-            var scaleFactor = 0.375; // Beispiel: 300px / 800px = 0.375, wenn die originale Karte 800px breit ist
+            var scaleFactor = 0.25; // Beispiel: 200px / 800px = 0.25, wenn die originale Karte 800px breit ist
         }
 
         @foreach (var table in tables)
         {
-            var scaledX = table.X * scaleFactor;
-            var scaledY = table.Y * scaleFactor;
+            var scaledX = Math.Round((double)table.X * scaleFactor);
+            var scaledY = Math.Round((double)table.Y * scaleFactor);
 
             <button class="table-btn"
                     style="position: absolute; left:@($"{scaledX}px"); top:@($"{scaledY}px"); width: 20px; height: 20px;">

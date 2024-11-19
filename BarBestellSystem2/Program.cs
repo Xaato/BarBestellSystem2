@@ -57,6 +57,7 @@ public static class Program
 
         app.MapBlazorHub();
         app.MapFallbackToPage("/_Host");
+        //app.MapFallbackToPage("/AdminPage", "/AdminPage/Tables");
         app.MapHub<NotificationHub>("/notificationHub");
         app.Run();
     }
