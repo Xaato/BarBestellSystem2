@@ -1,7 +1,10 @@
 ﻿@page "/AdminPage/Articles"
-@inject Application.BarDbContext DbContext
+@inject IDbContextFactory<BarDbContext> DbFactory
 @using Microsoft.EntityFrameworkCore
 @using Auth0.AspNetCore.Authentication
+@using System.Security.Claims
+@using Application
+@using Application.Models
 @attribute [Authorize]
 
 
@@ -20,8 +23,104 @@
 <pageTitle>Admin - Artikelverwaltung</pageTitle>
 
 <h2>Artikel</h2>
-
+<div class="accordion">
+  @foreach (ArticleGroup Category in GetCategories())
+  {
+    <div class="accordion-item">
+      <h2>
+        <button class="accordion-button @ActiveStates[Category][0]" type="button" data-bs-toggle="collapse"
+          data-bs-target="#collapseOne" aria-expanded="@((ActiveStates[Category][1] == "show").ToString())"
+          aria-controls="collapseOne" @onclick="@(e => SwitchState(Category))">
+          @Category.Name
+        </button>
+      </h2>
+      <div id="collapse@Category" class="accordion-collapse collapse @ActiveStates[Category][1]"
+        aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+        <div class="accordion-body">
+          <div class="list-group">
+            @foreach (Article Item in Category.Articles.ToArray())
+            {
+              <div class="input-group mb-4">
+                <select id="@Category.Name-@Item.Name-Group" class="form-select" aria-label="Notes" @onchange="@(e => selectedGroupChanged(Item,e))">
+                  @foreach(ArticleGroup lGr in GetCategories()) {
+                    if(lGr.Id == Category.Id){
+                      <option value="@lGr.Id" selected>@lGr.Name</option>
+                    }
+                    else{
+                      <option value="@lGr.Id">@lGr.Name</option>
+                    }
+                  }
+                </select>
+                <input id="@Category.Name-@Item.Name-Id" value="@Item.Number" type="text" class="form-control" aria-label="Notes" @oninput="@(ui => setNr(Item, ui))">
+                <input id="@Category.Name-@Item.Name-Name" value="@Item.Name" type="text" class="form-control" aria-label="Notes" @oninput="@(ui => setName(Item, ui))">
+                <input id="@Category.Name-@Item.Name-Price" value="@Item.Price.ToString("C")" type="text" class="form-control" aria-label="Notes" @oninput="@(ui => setPrice(Item, ui))">
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>
+<button type="button" class="btn btn-success" @onclick="Save">Speichern</button>
 @code {
+  private BarDbContext? Context { get; set; }
 
+  string ActiveCategory = string.Empty;
+  Dictionary<ArticleGroup, string[]> ActiveStates = new();
+
+  protected override async Task OnInitializedAsync()
+  {
+    Context = await DbFactory.CreateDbContextAsync();
+  }
+   public void Dispose() => Context?.Dispose();
+  private ArticleGroup[] GetCategories()
+  {
+    if (ActiveStates.Keys.Count() == 0)
+    {
+      foreach (ArticleGroup lCat in Context.ArticleGroups.Include(item => item.Articles).ToArray())
+      {
+        ActiveStates.Add(lCat, ["", "collapsed"]);
+      }
+    }
+    return ActiveStates.Keys.ToArray() ?? [];
+  }
+  private void SwitchState(ArticleGroup Category)
+  {
+    foreach (ArticleGroup lCategory in ActiveStates.Keys)
+    {
+      bool lState = false;
+      if (Category == lCategory)
+        lState = !string.Equals(ActiveStates[lCategory][1], "show");
+      ActiveStates[lCategory][0] = lState ? null : "collapsed";
+      ActiveStates[lCategory][1] = lState ? "show" : null;
+    }
+    StateHasChanged();
+  }
+  public void selectedGroupChanged(Article article, ChangeEventArgs args)
+  {
+    article.ArticleGroup = Context.ArticleGroups.FirstOrDefault(item => item.Id == int.Parse(args.Value.ToString()));
+  }
+  public void setNr(Article article, ChangeEventArgs args) {
+    if(int.TryParse(args.Value.ToString(), out int nr)) {
+      if(Context.Articles.Any(item => item.Number == nr)) {
+        //Do something?
+        return;
+      } else {
+        article.Number = nr;
+      }
+    }
+  }
+  public void setName(Article article, ChangeEventArgs args) {
+    //sanitize?
+    article.Name = args.Value.ToString();
+  }
+  public void setPrice(Article article, ChangeEventArgs args) {
+    if(decimal.TryParse(args.Value.ToString(), out decimal dec))
+      article.Price = dec;
+  }
+  public void Save() {
+    Context.SaveChanges();
+  }
 }
 

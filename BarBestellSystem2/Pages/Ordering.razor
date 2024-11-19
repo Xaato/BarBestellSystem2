@@ -61,7 +61,7 @@
             @foreach (Article Item in Category.Articles.ToArray())
             {
               <div class="input-group mb-4 @GetArticleCss(Item)">
-                <span class="input-group-text" @onclick="@(e => AddToCart(Item, getInputString(Item)))">@Item.Id</span>
+                <span class="input-group-text" @onclick="@(e => AddToCart(Item, getInputString(Item)))">@Item.Number</span>
                 <span class="input-group-text" @onclick="@(e => AddToCart(Item, getInputString(Item)))">@Item.Name</span>
                 <input id="@Category.Name-@Item.Name" type="text" class="form-control" aria-label="Notes" @oninput="@(ui => { 
                 if(InputValues.ContainsKey(Item))
