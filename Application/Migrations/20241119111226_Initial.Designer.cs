@@ -11,13 +11,13 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Application.Migrations
 {
     [DbContext(typeof(BarDbContext))]
-    [Migration("20241027185946_Initial")]
+    [Migration("20241119111226_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "6.0.35");
+            modelBuilder.HasAnnotation("ProductVersion", "6.0.36");
 
             modelBuilder.Entity("Application.Models.Article", b =>
                 {
@@ -31,6 +31,9 @@ namespace Application.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("TEXT");
+
+                    b.Property<int>("Number")
+                        .HasColumnType("INTEGER");
 
                     b.Property<decimal>("Price")
                         .HasColumnType("TEXT");
@@ -47,6 +50,7 @@ namespace Application.Migrations
                             Id = 1,
                             ArticleGroupId = 1,
                             Name = "Beer",
+                            Number = 0,
                             Price = 3.50m
                         },
                         new
@@ -54,6 +58,7 @@ namespace Application.Migrations
                             Id = 2,
                             ArticleGroupId = 1,
                             Name = "Wine",
+                            Number = 0,
                             Price = 4.50m
                         },
                         new
@@ -61,6 +66,7 @@ namespace Application.Migrations
                             Id = 3,
                             ArticleGroupId = 1,
                             Name = "Soda",
+                            Number = 0,
                             Price = 2.00m
                         },
                         new
@@ -68,6 +74,7 @@ namespace Application.Migrations
                             Id = 4,
                             ArticleGroupId = 2,
                             Name = "Pizza",
+                            Number = 0,
                             Price = 8.50m
                         },
                         new
@@ -75,6 +82,7 @@ namespace Application.Migrations
                             Id = 5,
                             ArticleGroupId = 2,
                             Name = "Burger",
+                            Number = 0,
                             Price = 7.50m
                         },
                         new
@@ -82,6 +90,7 @@ namespace Application.Migrations
                             Id = 6,
                             ArticleGroupId = 2,
                             Name = "Fries",
+                            Number = 0,
                             Price = 3.50m
                         },
                         new
@@ -89,6 +98,7 @@ namespace Application.Migrations
                             Id = 7,
                             ArticleGroupId = 3,
                             Name = "Ice Cream",
+                            Number = 0,
                             Price = 4.50m
                         },
                         new
@@ -96,6 +106,7 @@ namespace Application.Migrations
                             Id = 8,
                             ArticleGroupId = 3,
                             Name = "Cake",
+                            Number = 0,
                             Price = 5.50m
                         });
                 });

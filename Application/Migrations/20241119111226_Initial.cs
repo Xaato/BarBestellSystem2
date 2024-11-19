@@ -44,6 +44,7 @@ namespace Application.Migrations
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Name = table.Column<string>(type: "TEXT", nullable: false),
+                    Number = table.Column<int>(type: "INTEGER", nullable: false),
                     Price = table.Column<decimal>(type: "TEXT", nullable: false),
                     ArticleGroupId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
@@ -166,43 +167,43 @@ namespace Application.Migrations
 
             migrationBuilder.InsertData(
                 table: "Articles",
-                columns: new[] { "Id", "ArticleGroupId", "Name", "Price" },
-                values: new object[] { 1, 1, "Beer", 3.50m });
+                columns: new[] { "Id", "ArticleGroupId", "Name", "Number", "Price" },
+                values: new object[] { 1, 1, "Beer", 0, 3.50m });
 
             migrationBuilder.InsertData(
                 table: "Articles",
-                columns: new[] { "Id", "ArticleGroupId", "Name", "Price" },
-                values: new object[] { 2, 1, "Wine", 4.50m });
+                columns: new[] { "Id", "ArticleGroupId", "Name", "Number", "Price" },
+                values: new object[] { 2, 1, "Wine", 0, 4.50m });
 
             migrationBuilder.InsertData(
                 table: "Articles",
-                columns: new[] { "Id", "ArticleGroupId", "Name", "Price" },
-                values: new object[] { 3, 1, "Soda", 2.00m });
+                columns: new[] { "Id", "ArticleGroupId", "Name", "Number", "Price" },
+                values: new object[] { 3, 1, "Soda", 0, 2.00m });
 
             migrationBuilder.InsertData(
                 table: "Articles",
-                columns: new[] { "Id", "ArticleGroupId", "Name", "Price" },
-                values: new object[] { 4, 2, "Pizza", 8.50m });
+                columns: new[] { "Id", "ArticleGroupId", "Name", "Number", "Price" },
+                values: new object[] { 4, 2, "Pizza", 0, 8.50m });
 
             migrationBuilder.InsertData(
                 table: "Articles",
-                columns: new[] { "Id", "ArticleGroupId", "Name", "Price" },
-                values: new object[] { 5, 2, "Burger", 7.50m });
+                columns: new[] { "Id", "ArticleGroupId", "Name", "Number", "Price" },
+                values: new object[] { 5, 2, "Burger", 0, 7.50m });
 
             migrationBuilder.InsertData(
                 table: "Articles",
-                columns: new[] { "Id", "ArticleGroupId", "Name", "Price" },
-                values: new object[] { 6, 2, "Fries", 3.50m });
+                columns: new[] { "Id", "ArticleGroupId", "Name", "Number", "Price" },
+                values: new object[] { 6, 2, "Fries", 0, 3.50m });
 
             migrationBuilder.InsertData(
                 table: "Articles",
-                columns: new[] { "Id", "ArticleGroupId", "Name", "Price" },
-                values: new object[] { 7, 3, "Ice Cream", 4.50m });
+                columns: new[] { "Id", "ArticleGroupId", "Name", "Number", "Price" },
+                values: new object[] { 7, 3, "Ice Cream", 0, 4.50m });
 
             migrationBuilder.InsertData(
                 table: "Articles",
-                columns: new[] { "Id", "ArticleGroupId", "Name", "Price" },
-                values: new object[] { 8, 3, "Cake", 5.50m });
+                columns: new[] { "Id", "ArticleGroupId", "Name", "Number", "Price" },
+                values: new object[] { 8, 3, "Cake", 0, 5.50m });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Articles_ArticleGroupId",
