@@ -27,14 +27,14 @@
         <div class="list-group">
           @foreach (var Item in Cart)
           {
-            <button type="button" class="list-group-item list-group-item-action"
-            @onclick="@(e => RemoveFromCart(Item))">
+            <button type="button" class="list-group-item list-group-item-action" @onclick="@(e => RemoveFromCart(Item))">
               @Item.Article.ArticleGroup?.Name / @Item.Article.Name @FormatNotes(Item) x @Item.Amount
             </button>
           }
         </div>
         <div class="input-group mb-3">
-          <span class="input-group-text">@Cart.Select(item => item.Article.Price * item.Amount).Sum().ToString("C")</span>
+          <span class="input-group-text">@Cart.Select(item => item.Article.Price *
+            item.Amount).Sum().ToString("C")</span>
           <button type="button" class="btn btn-success" @onclick="Order">Order</button>
         </div>
       </div>
@@ -105,12 +105,14 @@
     {
       var state = await AuthenticationStateTask;
 
-      Username = state?.User?.Claims?.Where(item => item.Type.Equals(System.Security.Claims.ClaimTypes.GivenName))?.Select(c => c.Value).FirstOrDefault() ?? state?.User?.Identity?.Name ?? string.Empty;
+      Username = state?.User?.Claims?.Where(item => item.Type.Equals(System.Security.Claims.ClaimTypes.GivenName))?.Select(c
+      => c.Value).FirstOrDefault() ?? state?.User?.Identity?.Name ?? string.Empty;
       UserId = state?.User?.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
     }
     Context = await DbFactory.CreateDbContextAsync();
   }
   public void Dispose() => Context?.Dispose();
+  //Get list of Article Categories
   private ArticleGroup[] GetCategories()
   {
     if (ActiveStates.Keys.Count() == 0)
@@ -122,6 +124,7 @@
     }
     return ActiveStates.Keys.ToArray() ?? [];
   }
+  //Switch Accordion manually because screw JS
   private void SwitchState(ArticleGroup Category)
   {
     foreach (ArticleGroup lCategory in ActiveStates.Keys)
@@ -134,50 +137,58 @@
     }
     StateHasChanged();
   }
+  //Add Item to Cart
   private void AddToCart(Article Article, string Note)
   {
     CartItem lItem = Cart.FirstOrDefault(item => item.Article.Id == Article.Id && item.Notes == Note);
-    if(lItem == null) {
-      lItem = new CartItem() {Article = Article, Amount = 0, Notes = Note};
+    if (lItem == null)
+    {
+      lItem = new CartItem() { Article = Article, Amount = 0, Notes = Note };
       Cart.Add(lItem);
     }
     lItem.Amount++;
-    
-    if(ArticleCss.ContainsKey(Article))
+
+    //highlight item for a bit as feedback
+    if (ArticleCss.ContainsKey(Article))
       ArticleCss[Article] = "clicked";
     else
       ArticleCss.Add(Article, "clicked");
 
-    if(InputValues.ContainsKey(Article))
+    if (InputValues.ContainsKey(Article))
       InputValues[Article] = string.Empty;
-    
+
     StateHasChanged();
 
-    Task lT = Task.Run(async delegate {
+    //remove highlight after a moment
+    Task lT = Task.Run(async delegate
+    {
       await Task.Delay(200);
-      if(ArticleCss.ContainsKey(Article))
+      if (ArticleCss.ContainsKey(Article))
         ArticleCss[Article] = string.Empty;
       InvokeAsync(StateHasChanged);
     });
   }
+  //Remove item from cart
   private void RemoveFromCart(CartItem CartItem)
   {
-    if(Cart.Contains(CartItem)) {
-      if(CartItem.Amount > 1)
+    if (Cart.Contains(CartItem))
+    {
+      if (CartItem.Amount > 1)
         CartItem.Amount--;
       else
         Cart.Remove(CartItem);
     }
   }
+  //take current orders and store to DB
   private void Order()
   {
     if (!int.TryParse(Table, out _))
       return;
     Order lOrder = Context.Orders.Add(new()
-    {
-      TableId = int.Parse(Table),
-      Timestamp = DateTime.Now
-    }).Entity;
+      {
+        TableId = int.Parse(Table),
+        Timestamp = DateTime.Now
+      }).Entity;
     foreach (var lOrderPosition in Cart)
     {
       var OrderArt = Context.OrderArticles.Add(new()
@@ -194,28 +205,35 @@
     HubConnection.InvokeAsync("NewOrderPlaced");
     CartOpen = false;
   }
-  private string FormatNotes(CartItem Artik) {
-    if(Artik.Notes != string.Empty)
+  //format notes for display in the cart
+  private string FormatNotes(CartItem Artik)
+  {
+    if (Artik.Notes != string.Empty)
       return $"({Artik.Notes})";
     else
       return string.Empty;
   }
-  private string GetArticleCss(Article Artik) {
-    if(ArticleCss.ContainsKey(Artik))
+  //return Article rows css
+  private string GetArticleCss(Article Artik)
+  {
+    if (ArticleCss.ContainsKey(Artik))
       return ArticleCss[Artik];
     else
       return string.Empty;
   }
-  private string getInputString(Article Artik) {
-    if(InputValues.ContainsKey(Artik))
+  //Grab comment for order
+  private string getInputString(Article Artik)
+  {
+    if (InputValues.ContainsKey(Artik))
       return InputValues[Artik];
     else
       return string.Empty;
   }
 
-  public class CartItem {
-    public Article Article {get;set;}
-    public string Notes {get;set;}
-    public int Amount {get;set;}
+  public class CartItem
+  {
+    public Article Article { get; set; }
+    public string Notes { get; set; }
+    public int Amount { get; set; }
   }
 }

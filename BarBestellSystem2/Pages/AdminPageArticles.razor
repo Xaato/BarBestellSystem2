@@ -9,15 +9,15 @@
 
 
 <ul class="nav nav-tabs">
-    <li class="nav-item">
-        <NavLink class="nav-link" href="/AdminPage/Tables" activeClass="active">Tische</NavLink>
-    </li>
-    <li class="nav-item">
-        <NavLink class="nav-link" href="/AdminPage/Articles" activeClass="active">Artikel</NavLink>
-    </li>
-    <li class="nav-item">
-        <NavLink class="nav-link" href="/AdminPage/Users" activeClass="active">Benutzer</NavLink>
-    </li>
+  <li class="nav-item">
+    <NavLink class="nav-link" href="/AdminPage/Tables" activeClass="active">Tische</NavLink>
+  </li>
+  <li class="nav-item">
+    <NavLink class="nav-link" href="/AdminPage/Articles" activeClass="active">Artikel</NavLink>
+  </li>
+  <li class="nav-item">
+    <NavLink class="nav-link" href="/AdminPage/Users" activeClass="active">Benutzer</NavLink>
+  </li>
 </ul>
 
 <pageTitle>Admin - Artikelverwaltung</pageTitle>
@@ -38,23 +38,32 @@
         aria-labelledby="headingOne" data-bs-parent="#accordionExample">
         <div class="accordion-body">
           <div class="list-group">
-            @foreach (Article Item in Category.Articles.Where(item => Context.Entry(item).State != EntityState.Deleted).ToArray())
+            @foreach (Article Item in Category.Articles.Where(item => Context.Entry(item).State !=
+           EntityState.Deleted).ToArray())
             {
               <div class="input-group mb-5">
-                <select id="@Category.Name-@Item.Name-Group" class="form-select" aria-label="Notes" @onchange="@(e => selectedGroupChanged(Item,e))">
-                  @foreach(ArticleGroup lGr in GetCategories()) {
-                    if(lGr.Id == Category.Id){
+                <select id="@Category.Name-@Item.Name-Group" class="form-select" aria-label="Notes"
+                @onchange="@(e => selectedGroupChanged(Item,e))">
+                  @foreach (ArticleGroup lGr in GetCategories())
+                  {
+                    if (lGr.Id == Category.Id)
+                    {
                       <option value="@lGr.Id" selected>@lGr.Name</option>
                     }
-                    else{
+                    else
+                    {
                       <option value="@lGr.Id">@lGr.Name</option>
                     }
                   }
                 </select>
-                <input id="@Category.Name-@Item.Name-Id" value="@Item.Number" type="text" class="form-control" aria-label="Nummer" @oninput="@(ui => setNr(Item, ui))">
-                <input id="@Category.Name-@Item.Name-Name" value="@Item.Name" type="text" class="form-control" aria-label="Name" @oninput="@(ui => setName(Item, ui))">
-                <input id="@Category.Name-@Item.Name-Price" value="@Item.Price.ToString("C")" type="text" class="form-control" aria-label="Preis" @oninput="@(ui => setPrice(Item, ui))">
-                <span class="input-group-text bg-danger" style="cursor: pointer;" @onclick="@(ui => deleteArticle(Item, ui))" >🗑</span>
+                <input id="@Category.Name-@Item.Name-Id" value="@Item.Number" type="text" class="form-control"
+                  aria-label="Nummer" @oninput="@(ui => setNr(Item, ui))">
+                <input id="@Category.Name-@Item.Name-Name" value="@Item.Name" type="text" class="form-control"
+                  aria-label="Name" @oninput="@(ui => setName(Item, ui))">
+                <input id="@Category.Name-@Item.Name-Price" value="@Item.Price.ToString("C")" type="text"
+                  class="form-control" aria-label="Preis" @oninput="@(ui => setPrice(Item, ui))">
+                <span class="input-group-text bg-danger" style="cursor: pointer;"
+                @onclick="@(ui => deleteArticle(Item, ui))">🗑</span>
               </div>
             }
           </div>
@@ -75,7 +84,9 @@
   {
     Context = await DbFactory.CreateDbContextAsync();
   }
-   public void Dispose() => Context?.Dispose();
+  public void Dispose() => Context?.Dispose();
+
+  //get list of article groups
   private ArticleGroup[] GetCategories()
   {
     if (ActiveStates.Keys.Count() == 0)
@@ -87,6 +98,7 @@
     }
     return ActiveStates.Keys.ToArray() ?? [];
   }
+  //Accordion manual collapse logic because screw JS
   private void SwitchState(ArticleGroup Category)
   {
     foreach (ArticleGroup lCategory in ActiveStates.Keys)
@@ -99,33 +111,48 @@
     }
     StateHasChanged();
   }
+  //change group of article
   public void selectedGroupChanged(Article article, ChangeEventArgs args)
   {
     article.ArticleGroup = Context.ArticleGroups.FirstOrDefault(item => item.Id == int.Parse(args.Value.ToString()));
   }
-  public void setNr(Article article, ChangeEventArgs args) {
-    if(int.TryParse(args.Value.ToString(), out int nr)) {
-      if(Context.Articles.Any(item => item.Number == nr)) {
+  //Adjust number if it parses
+  public void setNr(Article article, ChangeEventArgs args)
+  {
+    if (int.TryParse(args.Value.ToString(), out int nr))
+    {
+      if (Context.Articles.Any(item => item.Number == nr))
+      {
         //Do something?
         return;
-      } else {
+      }
+      else
+      {
         article.Number = nr;
       }
     }
   }
-  public void setName(Article article, ChangeEventArgs args) {
+  //adjust name
+  public void setName(Article article, ChangeEventArgs args)
+  {
     //sanitize?
     article.Name = args.Value.ToString();
   }
-  public void setPrice(Article article, ChangeEventArgs args) {
-    if(decimal.TryParse(args.Value.ToString(), out decimal dec))
+  //Adjust price
+  public void setPrice(Article article, ChangeEventArgs args)
+  {
+    if (decimal.TryParse(args.Value.ToString(), out decimal dec))
       article.Price = dec;
   }
-  public void deleteArticle(Article article, MouseEventArgs args) {
+  //mark article for deletion
+  public void deleteArticle(Article article, MouseEventArgs args)
+  {
     Context.Articles.Remove(article);
     StateHasChanged();
   }
-  public void Save() {
+  //commit changes to DB
+  public void Save()
+  {
     Context.SaveChanges();
   }
 }
