@@ -54,7 +54,7 @@
                 <input id="@Category.Name-@Item.Name-Id" value="@Item.Number" type="text" class="form-control" aria-label="Nummer" @oninput="@(ui => setNr(Item, ui))">
                 <input id="@Category.Name-@Item.Name-Name" value="@Item.Name" type="text" class="form-control" aria-label="Name" @oninput="@(ui => setName(Item, ui))">
                 <input id="@Category.Name-@Item.Name-Price" value="@Item.Price.ToString("C")" type="text" class="form-control" aria-label="Preis" @oninput="@(ui => setPrice(Item, ui))">
-                <span class="input-group-text bg-danger" @onclick="@(ui => deleteArticle(Item, ui))" >🗑</span>
+                <span class="input-group-text bg-danger" style="cursor: pointer;" @onclick="@(ui => deleteArticle(Item, ui))" >🗑</span>
               </div>
             }
           </div>
