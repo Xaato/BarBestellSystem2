@@ -38,9 +38,9 @@
         aria-labelledby="headingOne" data-bs-parent="#accordionExample">
         <div class="accordion-body">
           <div class="list-group">
-            @foreach (Article Item in Category.Articles.ToArray())
+            @foreach (Article Item in Category.Articles.Where(item => Context.Entry(item).State != EntityState.Deleted).ToArray())
             {
-              <div class="input-group mb-4">
+              <div class="input-group mb-5">
                 <select id="@Category.Name-@Item.Name-Group" class="form-select" aria-label="Notes" @onchange="@(e => selectedGroupChanged(Item,e))">
                   @foreach(ArticleGroup lGr in GetCategories()) {
                     if(lGr.Id == Category.Id){
@@ -51,9 +51,10 @@
                     }
                   }
                 </select>
-                <input id="@Category.Name-@Item.Name-Id" value="@Item.Number" type="text" class="form-control" aria-label="Notes" @oninput="@(ui => setNr(Item, ui))">
-                <input id="@Category.Name-@Item.Name-Name" value="@Item.Name" type="text" class="form-control" aria-label="Notes" @oninput="@(ui => setName(Item, ui))">
-                <input id="@Category.Name-@Item.Name-Price" value="@Item.Price.ToString("C")" type="text" class="form-control" aria-label="Notes" @oninput="@(ui => setPrice(Item, ui))">
+                <input id="@Category.Name-@Item.Name-Id" value="@Item.Number" type="text" class="form-control" aria-label="Nummer" @oninput="@(ui => setNr(Item, ui))">
+                <input id="@Category.Name-@Item.Name-Name" value="@Item.Name" type="text" class="form-control" aria-label="Name" @oninput="@(ui => setName(Item, ui))">
+                <input id="@Category.Name-@Item.Name-Price" value="@Item.Price.ToString("C")" type="text" class="form-control" aria-label="Preis" @oninput="@(ui => setPrice(Item, ui))">
+                <span class="input-group-text bg-danger" @onclick="@(ui => deleteArticle(Item, ui))" >🗑</span>
               </div>
             }
           </div>
@@ -62,6 +63,7 @@
     </div>
   }
 </div>
+<br />
 <button type="button" class="btn btn-success" @onclick="Save">Speichern</button>
 @code {
   private BarDbContext? Context { get; set; }
@@ -118,6 +120,10 @@
   public void setPrice(Article article, ChangeEventArgs args) {
     if(decimal.TryParse(args.Value.ToString(), out decimal dec))
       article.Price = dec;
+  }
+  public void deleteArticle(Article article, MouseEventArgs args) {
+    Context.Articles.Remove(article);
+    StateHasChanged();
   }
   public void Save() {
     Context.SaveChanges();
