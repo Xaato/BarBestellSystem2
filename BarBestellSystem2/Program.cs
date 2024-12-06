@@ -2,6 +2,7 @@ using Application;
 using Application.Hubs;
 using Microsoft.AspNetCore.ResponseCompression;
 using Auth0.AspNetCore.Authentication;
+using Microsoft.EntityFrameworkCore;
 
 namespace BarBestellSystem2;
 
@@ -37,16 +38,17 @@ public static class Program
         });
         builder.Services.AddScoped<BlazorBootstrap.ToastService>();
         builder.Services.AddScoped<BarService>();
+
         var app = builder.Build();
         app.UseResponseCompression();
         // Configure the HTTP request pipeline.
         if (!app.Environment.IsDevelopment())
         {
             app.UseExceptionHandler("/Error");
-            app.UseHsts();
+            // app.UseHsts();
         }
 
-        app.UseHttpsRedirection();
+        // app.UseHttpsRedirection();
         app.UseStaticFiles();
 
         app.UseRouting();
@@ -59,6 +61,20 @@ public static class Program
         app.MapFallbackToPage("/_Host");
         //app.MapFallbackToPage("/AdminPage", "/AdminPage/Tables");
         app.MapHub<NotificationHub>("/notificationHub");
+        using (var scope = app.Services.CreateScope())
+        {
+            var dbContext = scope.ServiceProvider.GetRequiredService<BarDbContext>();
+            try
+            {
+                dbContext.Database.Migrate(); // Apply migrations
+                Console.WriteLine("Migrations applied successfully.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Database migration failed: {ex.Message}");
+            }
+        }
+
         app.Run();
     }
 }

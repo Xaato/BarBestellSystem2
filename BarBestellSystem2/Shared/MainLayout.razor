@@ -52,11 +52,12 @@
         {
             NavigationManager.NavigateTo("Login");
         }
-
+        // _hubConnection = new HubConnectionBuilder()
+        //     .WithUrl(NavigationManager.ToAbsoluteUri("/notificationHub"))
+        //     .Build();
         _hubConnection = new HubConnectionBuilder()
-            .WithUrl(NavigationManager.ToAbsoluteUri("/notificationHub"))
+            .WithUrl("http://localhost/notificationHub")
             .Build();
-
         _hubConnection.On<string, string>("ReceiveNotification", (userId, message) =>
         {
             if (User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value == userId)

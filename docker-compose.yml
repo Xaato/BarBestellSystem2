@@ -1,0 +1,10 @@
+﻿services:
+  barbestellsystem2:
+    image: barbestellsystem2
+    build:
+      context: .
+      dockerfile: BarBestellSystem2/Dockerfile
+    ports:
+      - "7292:80"
+    environment:
+      - ASPNETCORE_URLS=http://*:80
