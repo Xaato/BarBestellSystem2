@@ -66,7 +66,7 @@ public static class Program
             var dbContext = scope.ServiceProvider.GetRequiredService<BarDbContext>();
             try
             {
-                dbContext.Database.Migrate(); // Apply migrations
+                dbContext.Database.Migrate();
                 Console.WriteLine("Migrations applied successfully.");
             }
             catch (Exception ex)
