@@ -55,6 +55,7 @@
     <div class="map-container" style="position: relative; width: 200px; height: 150px; border: 1px solid #ccc;">
         @{
             var scaleFactor = 0.25; // Beispiel: 200px / 800px = 0.25, wenn die originale Karte 800px breit ist
+            var outOfBoundsY = 0; // Start-Y-Position für Tische außerhalb der Karte
         }
 
         @foreach (var table in tables)
@@ -62,13 +63,40 @@
             var scaledX = Math.Round((double)table.X * scaleFactor);
             var scaledY = Math.Round((double)table.Y * scaleFactor);
 
-            <button class="table-btn"
-                    style="position: absolute; left:@($"{scaledX}px"); top:@($"{scaledY}px"); width: 20px; height: 20px;">
-                @table.Name
-            </button>
+            // Überprüfen, ob der Tisch innerhalb der Karte liegt
+            if (scaledX >= 0 && scaledX <= 200 - 20 && scaledY >= 0 && scaledY <= 150 - 20)
+            {
+                // Tisch innerhalb der Karte anzeigen
+                <button class="table-btn"
+                        style="position: absolute; left:@($"{scaledX}px"); top:@($"{scaledY}px"); width: 20px; height: 20px;">
+                    @table.Name
+                </button>
+            }
         }
+
+        <!-- Bereich für Tische außerhalb der Karte -->
+        <div class="out-of-bounds-tables" style="position: absolute; left: 210px; top: 0;">
+            @foreach (var table in tables)
+            {
+                var scaledX = Math.Round((double)table.X * scaleFactor);
+                var scaledY = Math.Round((double)table.Y * scaleFactor);
+
+                // Wenn der Tisch außerhalb der Karte liegt
+                if (scaledX < 0 || scaledX > 200 - 20 || scaledY < 0 || scaledY > 150 - 20)
+                {
+                    <button class="table-btn"
+                            style="position: relative; top:@($"{outOfBoundsY}px"); width: 20px; height: 20px;">
+                        @table.Name
+                    </button>
+
+                    // Abstand für den nächsten Button setzen (z. B. 30px Button + 10px Abstand)
+                    outOfBoundsY += 5;
+                }
+            }
+        </div>
     </div>
 </div>
+
 
 <div>
     <h4>Neuen Tisch hinzufügen</h4>
@@ -92,9 +120,18 @@
 
 <style>
     .table-btn {
-        background-color: lightblue;
-        border: none;
-        border-radius: 5px;
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px; 
+        text-align: center;
+        background-color: #cce5ff;
+        border: 1px solid #007bff; 
+        border-radius: 3px;
+        padding: 0;
     }
 </style>
 
@@ -121,22 +158,6 @@
         await DbContext.SaveChangesAsync();
         tables = await DbContext.Tables.ToListAsync();
     }
-/*
-    public async void EditTable(int id)
-    {
-        var table = DbContext.Tables.FirstOrDefault(t => t.Id == id);
-        if (table != null)
-        {
-            table.Name = newTableName;
-            table.X = newTableX;
-            table.Y = newTableY;
-            DbContext.Tables.Add(table);
-            await DbContext.SaveChangesAsync();
-            tables = await DbContext.Tables.ToListAsync();
-        }
-    }
-    */
-
     public async Task DeleteTable(int id)
     {
         var table = await DbContext.Tables.FindAsync(id);

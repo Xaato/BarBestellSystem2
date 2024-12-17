@@ -24,14 +24,17 @@
 
 <h2>Artikel</h2>
 <div class="accordion">
-  @foreach (ArticleGroup Category in GetCategories())
+  @foreach (ArticleGroup Category in ActiveStates.Keys.ToArray())
   {
-    <div class="accordion-item">
+    <div class="accordion-item @blazorfuckery">
       <h2>
         <button class="accordion-button @ActiveStates[Category][0]" type="button" data-bs-toggle="collapse"
           data-bs-target="#collapseOne" aria-expanded="@((ActiveStates[Category][1] == "show").ToString())"
           aria-controls="collapseOne" @onclick="@(e => SwitchState(Category))">
-          @Category.Name
+          <input id="@Category.Name-Name" value="@Category.Name" type="text" class="form-control" aria-label="Nummer"
+          @oninput="@(ui => setGroupName(Category, ui))">
+          <span class="input-group-text bg-danger" style="cursor: pointer;"
+          @onclick="@(ui => deleteGroup(Category, ui))">🗑</span>
         </button>
       </h2>
       <div id="collapse@Category" class="accordion-collapse collapse @ActiveStates[Category][1]"
@@ -44,7 +47,7 @@
               <div class="input-group mb-5">
                 <select id="@Category.Name-@Item.Name-Group" class="form-select" aria-label="Notes"
                 @onchange="@(e => selectedGroupChanged(Item,e))">
-                  @foreach (ArticleGroup lGr in GetCategories())
+                  @foreach (ArticleGroup lGr in Context.ArticleGroups.ToArray())
                   {
                     if (lGr.Id == Category.Id)
                     {
@@ -74,30 +77,28 @@
 </div>
 <br />
 <button type="button" class="btn btn-success" @onclick="Save">Speichern</button>
+<button type="button" class="btn btn-success" @onclick="AddArticle">Artikel Hinzufügen</button>
+<button type="button" class="btn btn-success" @onclick="AddGroup">Gruppe Hinzufügen</button>
 @code {
   private BarDbContext? Context { get; set; }
 
   string ActiveCategory = string.Empty;
+  private string blazorfuckery = "";
+
   Dictionary<ArticleGroup, string[]> ActiveStates = new();
 
   protected override async Task OnInitializedAsync()
   {
     Context = await DbFactory.CreateDbContextAsync();
+
+    foreach (ArticleGroup lCat in Context.ArticleGroups.Include(item => item.Articles).ToArray())
+    {
+      if (!ActiveStates.Keys.Contains(lCat))
+        ActiveStates.Add(lCat, ["", "collapsed"]);
+    }
   }
   public void Dispose() => Context?.Dispose();
 
-  //get list of article groups
-  private ArticleGroup[] GetCategories()
-  {
-    if (ActiveStates.Keys.Count() == 0)
-    {
-      foreach (ArticleGroup lCat in Context.ArticleGroups.Include(item => item.Articles).ToArray())
-      {
-        ActiveStates.Add(lCat, ["", "collapsed"]);
-      }
-    }
-    return ActiveStates.Keys.ToArray() ?? [];
-  }
   //Accordion manual collapse logic because screw JS
   private void SwitchState(ArticleGroup Category)
   {
@@ -144,6 +145,10 @@
     if (decimal.TryParse(args.Value.ToString(), out decimal dec))
       article.Price = dec;
   }
+  public void setGroupName(ArticleGroup group, ChangeEventArgs args)
+  {
+    group.Name = args.Value.ToString();
+  }
   //mark article for deletion
   public void deleteArticle(Article article, MouseEventArgs args)
   {
@@ -154,6 +159,38 @@
   public void Save()
   {
     Context.SaveChanges();
+  }
+  public void AddArticle()
+  {
+    Context.Articles.Update(new()
+      {
+        Name = string.Empty,
+        ArticleGroup = ActiveStates.FirstOrDefault(item => item.Value[0] == null).Key ?? Context.ArticleGroups.FirstOrDefault()
+      });
+  }
+  public void AddGroup()
+  {
+    ArticleGroup lCat = new()
+      {
+        Name = string.Empty,
+        Articles = new List<Article>()
+      };
+    ActiveStates.Add(lCat, ["", "collapsed"]);
+    Context.ArticleGroups.Update(lCat);
+    blazorfuckery = DateTime.Now.Ticks.ToString();
+    InvokeAsync(() => StateHasChanged());
+  }
+  public void deleteGroup(ArticleGroup group, MouseEventArgs args)
+  {
+    foreach (Article art in Context.Articles.Where(item => item.ArticleGroup == group))
+    {
+      Context.Remove(art);
+    }
+    Context.Remove(group);
+    ActiveStates.Remove(group);
+    
+    blazorfuckery = DateTime.Now.Ticks.ToString();
+    InvokeAsync(() => StateHasChanged());
   }
 }
 
