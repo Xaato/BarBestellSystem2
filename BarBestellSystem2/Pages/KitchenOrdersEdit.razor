@@ -19,6 +19,13 @@
                             <p>
                                 @orderArticle.Article.Name @orderArticle.Amount x
                             </p>
+                            @if(orderArticle.Notes != "")
+                            {
+                                <p>
+                                    <b>Bemerkung:</b>
+                                    @orderArticle.Notes
+                                </p>
+                            }
                             <Switch Label="Fertig?" Disabled="Loading"
                                     Value="orderArticle.IsCompleted"
                                     ValueExpression="() => orderArticle.IsCompleted"
