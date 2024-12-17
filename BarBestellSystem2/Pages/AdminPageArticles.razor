@@ -24,9 +24,9 @@
 
 <h2>Artikel</h2>
 <div class="accordion">
-  @foreach (ArticleGroup Category in Context.ArticleGroups.ToArray())
+  @foreach (ArticleGroup Category in ActiveStates.Keys.ToArray())
   {
-    <div class="accordion-item">
+    <div class="accordion-item @blazorfuckery">
       <h2>
         <button class="accordion-button @ActiveStates[Category][0]" type="button" data-bs-toggle="collapse"
           data-bs-target="#collapseOne" aria-expanded="@((ActiveStates[Category][1] == "show").ToString())"
@@ -83,6 +83,8 @@
   private BarDbContext? Context { get; set; }
 
   string ActiveCategory = string.Empty;
+  private string blazorfuckery = "";
+
   Dictionary<ArticleGroup, string[]> ActiveStates = new();
 
   protected override async Task OnInitializedAsync()
@@ -175,7 +177,8 @@
       };
     ActiveStates.Add(lCat, ["", "collapsed"]);
     Context.ArticleGroups.Update(lCat);
-    StateHasChanged();
+    blazorfuckery = DateTime.Now.Ticks.ToString();
+    InvokeAsync(() => StateHasChanged());
   }
   public void deleteGroup(ArticleGroup group, MouseEventArgs args)
   {
@@ -185,7 +188,9 @@
     }
     Context.Remove(group);
     ActiveStates.Remove(group);
-    StateHasChanged();
+    
+    blazorfuckery = DateTime.Now.Ticks.ToString();
+    InvokeAsync(() => StateHasChanged());
   }
 }
 
